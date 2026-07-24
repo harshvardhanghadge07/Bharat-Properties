@@ -4,6 +4,16 @@ Same full-stack real estate portal, now powered by **MongoDB + Mongoose** instea
 
 ---
 
+## 🌐 Live Deployment
+
+| Service   | URL                                                                 |
+|-----------|----------------------------------------------------------------------|
+| Frontend  | [https://bharat-properties-ten.vercel.app](https://bharat-properties-ten.vercel.app) |
+| Backend API | [https://bharat-backend-3p58.onrender.com](https://bharat-backend-3p58.onrender.com) |
+| Health check | [https://bharat-backend-3p58.onrender.com/api/health](https://bharat-backend-3p58.onrender.com/api/health) |
+
+**Hosting:** Frontend on Vercel, backend on Render, database on MongoDB Atlas.
+
 ---
 
 ## 🐳 Production Deployment (Docker)
@@ -37,7 +47,6 @@ If it connects, you're good. If not, start MongoDB from Services or run:
 ```bash
 # Windows
 net start MongoDB
-
 # Mac
 brew services start mongodb-community
 ```
@@ -57,6 +66,10 @@ CLIENT_URL=http://localhost:5173
 PORT=4000
 ```
 
+> In production (Render), `CLIENT_URL` should be set to the deployed frontend URL, e.g.
+> `CLIENT_URL=https://bharat-properties-ten.vercel.app`
+> Multiple origins can be comma-separated: `CLIENT_URL=https://bharat-properties-ten.vercel.app,http://localhost:5173`
+
 Seed the database:
 ```bash
 node src/seed.js
@@ -74,6 +87,18 @@ Test: open http://localhost:4000/api/health → should show `{"status":"OK","db"
 ```bash
 cd frontend
 npm install
+```
+
+Open `frontend/.env` and set:
+```env
+VITE_API_URL=http://localhost:4000/api
+```
+
+> In production (Vercel), `VITE_API_URL` should point at the deployed backend, e.g.
+> `VITE_API_URL=https://bharat-backend-3p58.onrender.com/api`
+> Note: Vite bakes this in at **build time** — updating it in the Vercel dashboard requires a fresh redeploy to take effect.
+
+```bash
 npm run dev
 ```
 
@@ -84,14 +109,17 @@ Open http://localhost:5173 🎉
 ## 🔑 Admin Login
 
 Running `node src/seed.js` creates one admin account and prints its password **once**, to the terminal — it's randomly generated each time, not fixed, so save it when you see it:
+
 ```
 📧 Admin: admin@bharatproperties.com
 🔑 Password: <random — shown only at seed time>
 ```
+
 Want a specific password instead? Set it before seeding:
 ```bash
 SEED_ADMIN_PASSWORD=your_own_password node src/seed.js
 ```
+
 `seed.js` **deletes all existing users and properties** before reseeding. If `MONGO_URI` isn't pointing at `localhost`, it refuses to run unless you explicitly confirm with `CONFIRM_SEED=yes node src/seed.js` — this is meant to stop it from accidentally wiping a real (e.g. Atlas) database.
 
 ---
