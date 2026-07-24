@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: bharat-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/index.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # ── Add the rest of these in the Render dashboard → Environment ──
+      # MONGO_URI
+      # JWT_SECRET
+      # JWT_EXPIRES_IN
+      # CLIENT_URL          ← set this to your Vercel frontend URL
+      # CLOUDINARY_CLOUD_NAME
+      # CLOUDINARY_API_KEY
+      # CLOUDINARY_API_SECRET
+      # EMAIL_HOST
+      # EMAIL_PORT
+      # EMAIL_USER
+      # EMAIL_PASS
+      # EMAIL_FROM
+      # RAZORPAY_KEY_ID
+      # RAZORPAY_KEY_SECRET
+      # RAZORPAY_WEBHOOK_SECRET
+      # WHATSAPP_NUMBER
