@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useAuthStore } from './store/useAuthStore'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Home from './pages/Home'
@@ -26,8 +28,17 @@ import AdminAnalytics from './pages/Admin/Analytics'
 import AdminSubscriptions from './pages/Admin/Subscriptions'
 import ProtectedRoute from './components/ui/ProtectedRoute'
 import ScrollToTop from './components/ui/ScrollToTop'
+import NotFound from './pages/NotFound'
 
 export default function App() {
+  const fetchMe = useAuthStore((s) => s.fetchMe)
+
+  // Rehydrate the user session on every page load so isAuthenticated
+  // and the user object are always up-to-date from the server.
+  useEffect(() => {
+    if (localStorage.getItem('bp_token')) fetchMe()
+  }, [])
+
   return (
     <BrowserRouter>
       <ScrollToTop />
@@ -57,6 +68,7 @@ export default function App() {
         <Route path="/admin/inquiries" element={<ProtectedRoute adminOnly><AdminInquiries /></ProtectedRoute>} />
         <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalytics /></ProtectedRoute>} />
         <Route path="/admin/subscriptions" element={<ProtectedRoute adminOnly><AdminSubscriptions /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </BrowserRouter>

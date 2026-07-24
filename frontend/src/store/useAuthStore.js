@@ -74,6 +74,6 @@ export const useAuthStore = create(
         }
       },
     }),
-    { name: 'bp-auth', partialize: (s) => ({ token: s.token, user: s.user }) }
+    { name: 'bp-auth', partialize: (s) => ({ token: s.token, user: s.user, isAuthenticated: !!s.token }) }
   )
 )

@@ -247,7 +247,6 @@ export const forgotPassword = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-// STEP 2: User submits new password + the token from the emailed link
 // Admin: search users by name/email/phone — used e.g. to look up a seller
 // before manually granting them a subscription plan.
 export const searchUsers = async (req, res, next) => {
@@ -264,6 +263,7 @@ export const searchUsers = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
+// STEP 2: User submits new password + the token from the emailed link
 export const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body
