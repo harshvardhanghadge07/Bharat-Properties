@@ -21,6 +21,11 @@ connectDB()
 const app = express()
 const PORT = process.env.PORT || 4000
 
+// Render (and most cloud hosts) sit behind a reverse proxy that sets
+// X-Forwarded-For. Without this, express-rate-limit throws a validation
+// error and can't correctly identify users by IP.
+app.set('trust proxy', 1)
+
 // --- CORS setup -------------------------------------------------------
 // CLIENT_URL can hold one or more comma-separated origins, e.g.:
 //   CLIENT_URL=https://bharat-properties-ten.vercel.app,http://localhost:5173
@@ -63,43 +68,6 @@ app.get('/api/health', (req, res) =>
   res.json({ status: 'OK', message: 'Bharat Properties API running', db: 'MongoDB' })
 )
 
-// TEMPORARY: SMTP debug route — REMOVE after fixing email issues
-app.get('/api/debug/smtp', async (req, res) => {
-  const nodemailer = (await import('nodemailer')).default
-  const EMAIL_USER = process.env.EMAIL_USER
-  const EMAIL_PASS = process.env.EMAIL_PASS?.replace(/\s+/g, '')
-  const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || '465')
-  const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com'
-
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    return res.json({ ok: false, error: 'EMAIL_USER or EMAIL_PASS not set in environment' })
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: EMAIL_HOST,
-    port: EMAIL_PORT,
-    secure: EMAIL_PORT === 465,
-    auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-  })
-
-  try {
-    await transporter.verify()
-    res.json({
-      ok: true,
-      message: 'SMTP connection verified successfully!',
-      config: { host: EMAIL_HOST, port: EMAIL_PORT, secure: EMAIL_PORT === 465, user: EMAIL_USER, passLength: EMAIL_PASS.length }
-    })
-  } catch (err) {
-    res.json({
-      ok: false,
-      error: err.message,
-      code: err.code,
-      config: { host: EMAIL_HOST, port: EMAIL_PORT, secure: EMAIL_PORT === 465, user: EMAIL_USER, passLength: EMAIL_PASS?.length }
-    })
-  }
-})
 
 app.use('/api/properties', propertiesRouter)
 app.use('/api/auth', authRouter)

@@ -1,17 +1,24 @@
+import { Resend } from 'resend'
 import nodemailer from 'nodemailer'
 
+// ─── Resend (HTTP API — works on Render, never blocked) ───────────────────
+const getResend = () => {
+  if (!process.env.RESEND_API_KEY) return null
+  return new Resend(process.env.RESEND_API_KEY)
+}
+
+// ─── Nodemailer fallback (for local dev with Gmail) ───────────────────────
+// Render and most cloud hosts block outbound SMTP, so this only works locally.
 const getTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
-  // Port 465 + secure:true (SMTPS) is more reliable on cloud hosts like Render
-  // which commonly block outbound port 587 (STARTTLS) to prevent spam.
   const port = parseInt(process.env.EMAIL_PORT || '465')
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port,
-    secure: port === 465, // true for 465 (SSL), false for 587 (STARTTLS)
+    secure: port === 465,
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS.replace(/\s+/g, ''), // strip any accidental spaces from App Password
+      pass: process.env.EMAIL_PASS.replace(/\s+/g, ''),
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -19,41 +26,45 @@ const getTransporter = () => {
   })
 }
 
-export const sendInquiryEmail = async (inquiry) => {
-  // Skip silently if email credentials not set in .env
-  const transporter = getTransporter()
-  if (!transporter) {
-    console.log('ℹ️  Email skipped — EMAIL_USER/EMAIL_PASS not set in .env')
+// Resolve the FROM address:
+//  - If Resend: must be a verified domain address (e.g. noreply@yourdomain.com)
+//    OR use Resend's shared sandbox: "onboarding@resend.dev" (only sends to owner's email)
+//  - If Nodemailer: use EMAIL_FROM / EMAIL_USER
+const getFromAddress = () =>
+  process.env.RESEND_FROM || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@bharatproperties.in'
+
+// ─── Generic send helper ───────────────────────────────────────────────────
+// Tries Resend first (production), falls back to Nodemailer (local dev),
+// and logs to console if neither is configured.
+const sendEmail = async ({ to, subject, html, devLog }) => {
+  const resend = getResend()
+  if (resend) {
+    const { error } = await resend.emails.send({
+      from: getFromAddress(),
+      to,
+      subject,
+      html,
+    })
+    if (error) throw new Error(`Resend error: ${error.message}`)
+    console.log(`✅ Email sent via Resend to: ${to}`)
     return
   }
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
-    subject: `New Inquiry: ${inquiry.property?.title || 'Property'}`,
-    html: `
-      <h2 style="color:#E8532A">New Property Inquiry — Bharat Properties</h2>
-      <p><b>Property:</b> ${inquiry.property?.title} (${inquiry.property?.city})</p>
-      <p><b>From:</b> ${inquiry.name}</p>
-      <p><b>Email:</b> ${inquiry.email}</p>
-      <p><b>Phone:</b> ${inquiry.phone || 'Not provided'}</p>
-      <p><b>Message:</b><br/>${inquiry.message}</p>
-    `,
-  })
+  const transporter = getTransporter()
+  if (transporter) {
+    await transporter.sendMail({ from: getFromAddress(), to, subject, html })
+    console.log(`✅ Email sent via Nodemailer to: ${to}`)
+    return
+  }
 
-  console.log(`✅ Inquiry email sent for: ${inquiry.property?.title}`)
+  // Neither configured — dev mode, just log the link
+  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Set RESEND_API_KEY in .env to send real emails)\n`)
 }
 
-// Sends the "verify your email" link to the user's email
-export const sendVerificationEmail = async (user, verifyUrl) => {
-  const transporter = getTransporter()
-  if (!transporter) {
-    console.log(`\n📧 [DEV MODE] Email verification link for ${user.email}:\n   ${verifyUrl}\n   (Configure EMAIL_USER/EMAIL_PASS in .env to send real emails)\n`)
-    return
-  }
+// ─── Public helpers ────────────────────────────────────────────────────────
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+export const sendVerificationEmail = async (user, verifyUrl) => {
+  await sendEmail({
     to: user.email,
     subject: 'Verify your Bharat Properties email address',
     html: `
@@ -70,22 +81,12 @@ export const sendVerificationEmail = async (user, verifyUrl) => {
         <p style="color:#888;font-size:12px;">If the button doesn't work, copy and paste this link into your browser:<br/>${verifyUrl}</p>
       </div>
     `,
+    devLog: `Email verification link for ${user.email}:\n   ${verifyUrl}`,
   })
-
-  console.log(`✅ Verification email sent to: ${user.email}`)
 }
 
-// Sends the "reset your password" link to the user's email
 export const sendResetPasswordEmail = async (user, resetUrl) => {
-  const transporter = getTransporter()
-  if (!transporter) {
-    // Dev mode fallback — print the link to the terminal instead of emailing it
-    console.log(`\n🔑 [DEV MODE] Password reset link for ${user.email}:\n   ${resetUrl}\n   (Configure EMAIL_USER/EMAIL_PASS in .env to send real emails)\n`)
-    return
-  }
-
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+  await sendEmail({
     to: user.email,
     subject: 'Reset your Bharat Properties password',
     html: `
@@ -102,7 +103,22 @@ export const sendResetPasswordEmail = async (user, resetUrl) => {
         <p style="color:#888;font-size:12px;">If the button doesn't work, copy and paste this link into your browser:<br/>${resetUrl}</p>
       </div>
     `,
+    devLog: `Password reset link for ${user.email}:\n   ${resetUrl}`,
   })
+}
 
-  console.log(`✅ Password reset email sent to: ${user.email}`)
+export const sendInquiryEmail = async (inquiry) => {
+  await sendEmail({
+    to: process.env.EMAIL_USER || process.env.RESEND_FROM,
+    subject: `New Inquiry: ${inquiry.property?.title || 'Property'}`,
+    html: `
+      <h2 style="color:#E8532A">New Property Inquiry — Bharat Properties</h2>
+      <p><b>Property:</b> ${inquiry.property?.title} (${inquiry.property?.city})</p>
+      <p><b>From:</b> ${inquiry.name}</p>
+      <p><b>Email:</b> ${inquiry.email}</p>
+      <p><b>Phone:</b> ${inquiry.phone || 'Not provided'}</p>
+      <p><b>Message:</b><br/>${inquiry.message}</p>
+    `,
+    devLog: `Inquiry notification for: ${inquiry.property?.title}`,
+  })
 }
