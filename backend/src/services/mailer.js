@@ -2,16 +2,20 @@ import nodemailer from 'nodemailer'
 
 const getTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
+  // Port 465 + secure:true (SMTPS) is more reliable on cloud hosts like Render
+  // which commonly block outbound port 587 (STARTTLS) to prevent spam.
+  const port = parseInt(process.env.EMAIL_PORT || '465')
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: false,
+    port,
+    secure: port === 465, // true for 465 (SSL), false for 587 (STARTTLS)
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS.replace(/\s+/g, ''), // strip any accidental spaces from App Password
     },
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   })
 }
 

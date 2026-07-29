@@ -241,7 +241,11 @@ export const forgotPassword = async (req, res, next) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
     const resetUrl = `${clientUrl}/reset-password/${rawToken}`
 
-    await sendResetPasswordEmail(user, resetUrl)
+    // Fire-and-forget — respond immediately so a slow/blocked SMTP on cloud
+    // hosts (e.g. Render blocking port 587) never causes the request to timeout.
+    sendResetPasswordEmail(user, resetUrl).catch((err) =>
+      console.error('Failed to send password reset email:', err.message)
+    )
 
     res.json({ message: 'If an account exists for that email, a reset link has been sent.' })
   } catch (err) { next(err) }
