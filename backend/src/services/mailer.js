@@ -1,15 +1,37 @@
-import { Resend } from 'resend'
 import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-// ─── Resend (HTTP API — works on Render, never blocked) ───────────────────
+// ─── Priority order ────────────────────────────────────────────────────────
+// 1. Brevo SMTP relay  — works on cloud hosts (smtp-relay.brevo.com:587)
+// 2. Resend HTTP API   — fallback, needs verified domain for sending to others
+// 3. Gmail SMTP        — local dev only (blocked on Render & most cloud hosts)
+// 4. Dev mode          — logs link to console if nothing is configured
+
+// ─── Brevo SMTP transporter ───────────────────────────────────────────────
+const getBrevoTransporter = () => {
+  if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_PASS) return null
+  return nodemailer.createTransport({
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false, // STARTTLS on 587
+    auth: {
+      user: process.env.BREVO_SMTP_USER,
+      pass: process.env.BREVO_SMTP_PASS,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  })
+}
+
+// ─── Resend HTTP API (fallback) ───────────────────────────────────────────
 const getResend = () => {
   if (!process.env.RESEND_API_KEY) return null
   return new Resend(process.env.RESEND_API_KEY)
 }
 
-// ─── Nodemailer fallback (for local dev with Gmail) ───────────────────────
-// Render and most cloud hosts block outbound SMTP, so this only works locally.
-const getTransporter = () => {
+// ─── Gmail SMTP (local dev fallback) ─────────────────────────────────────
+const getGmailTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
   const port = parseInt(process.env.EMAIL_PORT || '465')
   return nodemailer.createTransport({
@@ -22,43 +44,53 @@ const getTransporter = () => {
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
-    socketTimeout: 15000,
   })
 }
 
-// Resolve the FROM address:
-//  - If Resend: must be a verified domain address (e.g. noreply@yourdomain.com)
-//    OR use Resend's shared sandbox: "onboarding@resend.dev" (only sends to owner's email)
-//  - If Nodemailer: use EMAIL_FROM / EMAIL_USER
 const getFromAddress = () =>
-  process.env.RESEND_FROM || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@bharatproperties.in'
+  process.env.BREVO_FROM ||
+  process.env.RESEND_FROM ||
+  process.env.EMAIL_FROM ||
+  process.env.EMAIL_USER ||
+  'noreply@bharatproperties.in'
 
 // ─── Generic send helper ───────────────────────────────────────────────────
-// Tries Resend first (production), falls back to Nodemailer (local dev),
-// and logs to console if neither is configured.
 const sendEmail = async ({ to, subject, html, devLog }) => {
+  // 1. Try Brevo SMTP first (works on Render)
+  const brevo = getBrevoTransporter()
+  if (brevo) {
+    try {
+      await brevo.sendMail({ from: getFromAddress(), to, subject, html })
+      console.log(`✅ Email sent via Brevo to: ${to}`)
+      return
+    } catch (err) {
+      console.error('⚠️  Brevo SMTP failed:', err.message, '— trying fallback...')
+    }
+  }
+
+  // 2. Try Resend HTTP API
   const resend = getResend()
   if (resend) {
-    const { error } = await resend.emails.send({
-      from: getFromAddress(),
-      to,
-      subject,
-      html,
-    })
-    if (error) throw new Error(`Resend error: ${error.message}`)
-    console.log(`✅ Email sent via Resend to: ${to}`)
+    try {
+      const { error } = await resend.emails.send({ from: getFromAddress(), to, subject, html })
+      if (error) throw new Error(error.message)
+      console.log(`✅ Email sent via Resend to: ${to}`)
+      return
+    } catch (err) {
+      console.error('⚠️  Resend failed:', err.message, '— trying fallback...')
+    }
+  }
+
+  // 3. Try Gmail SMTP (local dev)
+  const gmail = getGmailTransporter()
+  if (gmail) {
+    await gmail.sendMail({ from: getFromAddress(), to, subject, html })
+    console.log(`✅ Email sent via Gmail SMTP to: ${to}`)
     return
   }
 
-  const transporter = getTransporter()
-  if (transporter) {
-    await transporter.sendMail({ from: getFromAddress(), to, subject, html })
-    console.log(`✅ Email sent via Nodemailer to: ${to}`)
-    return
-  }
-
-  // Neither configured — dev mode, just log the link
-  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Set RESEND_API_KEY in .env to send real emails)\n`)
+  // 4. Nothing configured — dev mode
+  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Set BREVO_SMTP_USER/BREVO_SMTP_PASS in .env to send real emails)\n`)
 }
 
 // ─── Public helpers ────────────────────────────────────────────────────────
@@ -108,8 +140,9 @@ export const sendResetPasswordEmail = async (user, resetUrl) => {
 }
 
 export const sendInquiryEmail = async (inquiry) => {
+  const to = process.env.EMAIL_USER || process.env.BREVO_FROM || process.env.RESEND_FROM
   await sendEmail({
-    to: process.env.EMAIL_USER || process.env.RESEND_FROM,
+    to,
     subject: `New Inquiry: ${inquiry.property?.title || 'Property'}`,
     html: `
       <h2 style="color:#E8532A">New Property Inquiry — Bharat Properties</h2>
