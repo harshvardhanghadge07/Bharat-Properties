@@ -18,11 +18,38 @@ import { handleRazorpayWebhook } from './controllers/subscriptionController.js'
 
 connectDB()
 
-const app  = express()
+const app = express()
 const PORT = process.env.PORT || 4000
 
+// --- CORS setup -------------------------------------------------------
+// CLIENT_URL can hold one or more comma-separated origins, e.g.:
+//   CLIENT_URL=https://bharat-properties-ten.vercel.app,http://localhost:5173
+// Each entry is trimmed to strip any stray whitespace/newlines that sneak
+// in via copy-paste into Render's env var dashboard — an untrimmed value
+// causes Node to throw "Invalid character in header content" when it
+// tries to write the Access-Control-Allow-Origin header.
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean)
+
+console.log('✅ CORS allowed origins:', allowedOrigins)
+
 app.use(helmet())
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }))
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, mobile apps, health checks)
+    if (!origin) return callback(null, true)
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+
+    console.warn(`🚫 CORS blocked request from origin: ${origin}`)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true
+}))
 
 // Razorpay webhook MUST come before express.json() and receive the RAW body —
 // signature verification hashes the exact raw bytes Razorpay sent, not a re-serialized object.
@@ -36,13 +63,13 @@ app.get('/api/health', (req, res) =>
   res.json({ status: 'OK', message: 'Bharat Properties API running', db: 'MongoDB' })
 )
 
-app.use('/api/properties',    propertiesRouter)
-app.use('/api/auth',          authRouter)
-app.use('/api/inquiries',     inquiriesRouter)
-app.use('/api/upload',        uploadRouter)
+app.use('/api/properties', propertiesRouter)
+app.use('/api/auth', authRouter)
+app.use('/api/inquiries', inquiriesRouter)
+app.use('/api/upload', uploadRouter)
 app.use('/api/subscriptions', subscriptionsRouter)
-app.use('/api/analytics',     analyticsRouter)
-app.use('/api/favorites',     favoritesRouter)
+app.use('/api/analytics', analyticsRouter)
+app.use('/api/favorites', favoritesRouter)
 
 // SEO: dynamic sitemap + crawler-only prerendered OG pages.
 // nginx routes /sitemap.xml and known-bot requests here — see nginx.conf.
