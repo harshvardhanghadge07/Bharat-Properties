@@ -81,21 +81,21 @@ export default function Profile() {
   }
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your account details</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Profile</h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-0.5">Manage your account details and security</p>
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8"
         >
           {/* Avatar + summary */}
-          <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shrink-0 shadow-md shadow-orange-500/20">
               {(user?.name || 'U').charAt(0).toUpperCase()}
             </div>
             <div>

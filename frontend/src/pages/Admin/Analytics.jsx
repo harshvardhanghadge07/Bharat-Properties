@@ -8,6 +8,7 @@ import {
 import { analyticsApi } from '../../services/api'
 import { TYPE_LABELS } from '../../utils/helpers'
 import Skeleton from '../../components/ui/Skeleton'
+import AdminNav from '../../components/ui/AdminNav'
 
 const COLORS = ['#E8532A', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316']
 
@@ -19,8 +20,9 @@ export default function AdminAnalytics() {
 
   if (isLoading) {
     return (
-      <div className="pt-16 min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 py-10 space-y-6">
+      <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+        <AdminNav />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
             {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
@@ -44,10 +46,11 @@ export default function AdminAnalytics() {
   ]
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <AdminNav />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="text-gray-500 text-sm">Overview of properties, users, and inquiries</p>
         </div>
 

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Mail, Phone, Trash2, CheckCheck, Eye, Search } from 'lucide-react'
 import { inquiryApi } from '../../services/api'
 import Skeleton from '../../components/ui/Skeleton'
+import AdminNav from '../../components/ui/AdminNav'
 
 export default function AdminInquiries() {
   const qc = useQueryClient()
@@ -30,14 +31,15 @@ export default function AdminInquiries() {
   )
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Inquiries</h1>
-          <p className="text-gray-500 text-sm">Manage property inquiries from potential buyers</p>
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <AdminNav />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inquiries</h1>
+          <p className="text-gray-500 text-xs sm:text-sm">Manage property inquiries from potential buyers</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden flex" style={{ minHeight: 500 }}>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row" style={{ minHeight: 500 }}>
           {/* List pane */}
           <div className="w-full md:w-80 border-r border-gray-100 flex flex-col shrink-0">
             {/* Search + filter */}

@@ -6,6 +6,7 @@ import { propertyApi, uploadApi } from '../../services/api'
 import { formatPrice, PROPERTY_TYPES, TYPE_LABELS } from '../../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../../utils/indiaData'
 import Skeleton from '../../components/ui/Skeleton'
+import AdminNav from '../../components/ui/AdminNav'
 
 // Admins bypass the plan-based photo limit (matches PLANS.UNLIMITED.photoLimit on the backend)
 const ADMIN_PHOTO_LIMIT = 15
@@ -95,17 +96,23 @@ export default function ManageListings() {
   })
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Manage Listings</h1>
-          <button onClick={openNew} className="btn-primary"><Plus size={16} /> Add Property</button>
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <AdminNav />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Manage Listings</h1>
+            <p className="text-gray-500 text-xs sm:text-sm">Manage all property listings across India</p>
+          </div>
+          <button onClick={openNew} className="btn-primary text-xs sm:text-sm py-2.5 px-4 shadow-md shadow-orange-500/20">
+            <Plus size={16} /> Add Property
+          </button>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[650px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>{['Image','Title','City','Type','Price','Status','Featured','Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>

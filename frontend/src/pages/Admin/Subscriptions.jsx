@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Plus, X, RotateCcw, Search, Check } from 'lucide-react'
 import { subscriptionApi, adminApi } from '../../services/api'
 import Skeleton from '../../components/ui/Skeleton'
+import AdminNav from '../../components/ui/AdminNav'
 
 const PLAN_BADGE = {
   FREE:      'bg-gray-100 text-gray-600',
@@ -30,21 +31,22 @@ export default function AdminSubscriptions() {
   const lastSource = (sub) => sub.history?.[sub.history.length - 1]?.source
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <AdminNav />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Subscriptions</h1>
-            <p className="text-gray-500 text-sm">Manage seller plans — including granting access manually</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Subscriptions</h1>
+            <p className="text-gray-500 text-xs sm:text-sm">Manage seller plans — including granting access manually</p>
           </div>
-          <button onClick={() => setModal(true)} className="btn-primary">
+          <button onClick={() => setModal(true)} className="btn-primary text-xs sm:text-sm py-2.5 px-4 shadow-md shadow-orange-500/20">
             <Plus size={16} /> Grant Plan Manually
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[650px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
                   {['User', 'Plan', 'Status', 'Expiry', 'Source', 'Actions'].map((h) => (
