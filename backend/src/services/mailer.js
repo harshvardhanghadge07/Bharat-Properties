@@ -2,10 +2,10 @@ import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 
 // ─── Priority order ────────────────────────────────────────────────────────
-// 1. Brevo SMTP relay  — works on cloud hosts (smtp-relay.brevo.com:587)
-// 2. Resend HTTP API   — fallback, needs verified domain for sending to others
-// 3. Gmail SMTP        — local dev only (blocked on Render & most cloud hosts)
-// 4. Dev mode          — logs link to console if nothing is configured
+// 1. Brevo SMTP relay  — primary (works on Render & cloud hosts to any recipient)
+// 2. Gmail SMTP        — fallback
+// 3. Resend HTTP API   — fallback
+// 4. Dev mode          — logs link to console if all fail
 
 // ─── Brevo SMTP transporter ───────────────────────────────────────────────
 const getBrevoTransporter = () => {
@@ -56,7 +56,20 @@ const getFromAddress = () =>
 
 // ─── Generic send helper ───────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html, devLog }) => {
-  // 1. Try Gmail SMTP first (working app password & direct delivery)
+  // 1. Try Brevo SMTP first (primary — works on Render cloud servers & sends to any address)
+  const brevo = getBrevoTransporter()
+  if (brevo) {
+    try {
+      const from = process.env.BREVO_FROM || 'Bharat Properties <bharatestates3@gmail.com>'
+      await brevo.sendMail({ from, to, subject, html })
+      console.log(`✅ Email sent via Brevo SMTP to: ${to}`)
+      return
+    } catch (err) {
+      console.error('⚠️ Brevo SMTP failed:', err.message, '— trying fallback...')
+    }
+  }
+
+  // 2. Try Gmail SMTP
   const gmail = getGmailTransporter()
   if (gmail) {
     try {
@@ -65,11 +78,11 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
       console.log(`✅ Email sent via Gmail SMTP to: ${to}`)
       return
     } catch (err) {
-      console.error('⚠️  Gmail SMTP failed:', err.message, '— trying fallback...')
+      console.error('⚠️ Gmail SMTP failed:', err.message, '— trying fallback...')
     }
   }
 
-  // 2. Try Resend HTTP API
+  // 3. Try Resend HTTP API
   const resend = getResend()
   if (resend) {
     try {
@@ -79,25 +92,12 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
       console.log(`✅ Email sent via Resend to: ${to}`)
       return
     } catch (err) {
-      console.error('⚠️  Resend failed:', err.message, '— trying fallback...')
-    }
-  }
-
-  // 3. Try Brevo SMTP
-  const brevo = getBrevoTransporter()
-  if (brevo) {
-    try {
-      const from = process.env.BREVO_FROM || 'noreply@bharatproperties.in'
-      await brevo.sendMail({ from, to, subject, html })
-      console.log(`✅ Email sent via Brevo to: ${to}`)
-      return
-    } catch (err) {
-      console.error('⚠️  Brevo SMTP failed:', err.message, '— trying fallback...')
+      console.error('⚠️ Resend failed:', err.message, '— trying fallback...')
     }
   }
 
   // 4. Nothing configured or all failed — dev mode
-  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Configure EMAIL_USER/EMAIL_PASS in .env to send real emails)\n`)
+  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Configure BREVO_SMTP_USER/PASS in .env to send real emails)\n`)
 }
 
 // ─── Public helpers ────────────────────────────────────────────────────────
