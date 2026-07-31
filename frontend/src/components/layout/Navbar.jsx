@@ -9,6 +9,7 @@ const navLinks = [
   { label: 'Buy',   href: '/properties?status=ACTIVE' },
   { label: 'Rent',  href: '/properties?status=RENTED' },
   { label: 'Pricing', href: '/pricing' },
+  { label: 'Support', href: '/support' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ]

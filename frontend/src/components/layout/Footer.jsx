@@ -5,6 +5,7 @@ const CITIES  = ['Mumbai','Delhi','Bengaluru','Hyderabad','Chennai','Pune','Kolk
 const TYPES   = ['Apartments','Villas','Plots','Commercial','Penthouses','Farmhouses']
 const COMPANY = [
   { label: 'About Us',    href: '/about' },
+  { label: 'Help & Support', href: '/support' },
   { label: 'Contact',     href: '/contact' },
   { label: 'Properties',  href: '/properties' },
   { label: 'Privacy Policy', href: '/privacy' },
