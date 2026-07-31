@@ -73,12 +73,15 @@ export default function PropertyDetail() {
   )
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
-  // Google Maps embed — uses exact lat/lng if the listing has them, otherwise falls back to the address text
+  // Google Maps embed — uses exact lat/lng if the listing has them, otherwise falls back to address query
   const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  const isRealApiKey = mapsApiKey && !mapsApiKey.includes('AIzaSyDwPxG') && mapsApiKey.length > 20
   const mapQuery = property.lat && property.lng
     ? `${property.lat},${property.lng}`
     : encodeURIComponent(`${property.location}, ${property.city}, ${property.state}`)
-  const mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${mapQuery}`
+  const mapEmbedUrl = isRealApiKey
+    ? `https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${mapQuery}`
+    : `https://maps.google.com/maps?q=${mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`
   const mapDirectionsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
 
   return (
@@ -217,24 +220,17 @@ export default function PropertyDetail() {
                 </a>
               </div>
               <div className="rounded-xl overflow-hidden border border-gray-100 h-72">
-                {mapsApiKey ? (
-                  <iframe
-                    title="Property location map"
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    style={{ border: 0 }}
-                    src={mapEmbedUrl}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400 text-sm gap-2">
-                    <MapPin size={20} />
-                    Map unavailable — VITE_GOOGLE_MAPS_API_KEY is not configured
-                  </div>
-                )}
+                <iframe
+                  title="Property location map"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  style={{ border: 0 }}
+                  src={mapEmbedUrl}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
               <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                 <MapPin size={12} /> {property.location}, {property.city}, {property.state}
