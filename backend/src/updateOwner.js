@@ -11,7 +11,7 @@ dotenv.config()
 const OWNER = {
   name: 'Harshvardhan Ghadge',
   email: 'bharatestates3@gmail.com',
-  password: 'Harshu07',
+  password: 'kedarnath3',
   phone: '',
   role: 'ADMIN',
 }
