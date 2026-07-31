@@ -29,14 +29,14 @@ const CITIES = [
   },
   {
     name: 'Chennai',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Marina_Beach%2C_Chennai_01.jpg/800px-Marina_Beach%2C_Chennai_01.jpg',
-    fallback: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format',
+    img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format',
+    fallback: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format',
     count: '5,400+',
   },
   {
     name: 'Pune',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Shaniwar_Wada_Pune.jpg/800px-Shaniwar_Wada_Pune.jpg',
-    fallback: 'https://images.unsplash.com/photo-1558980664-769d59546b3d?w=600&auto=format',
+    img: 'https://images.unsplash.com/photo-1558980664-769d59546b3d?w=600&auto=format',
+    fallback: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&auto=format',
     count: '4,700+',
   },
 ]
