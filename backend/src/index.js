@@ -12,6 +12,7 @@ import uploadRouter from './routes/upload.js'
 import subscriptionsRouter from './routes/subscriptions.js'
 import analyticsRouter from './routes/analytics.js'
 import favoritesRouter from './routes/favorites.js'
+import aiRouter from './routes/ai.js'
 import prerenderRouter from './routes/prerender.js'
 import { getSitemap } from './controllers/seoController.js'
 import { handleRazorpayWebhook } from './controllers/subscriptionController.js'
@@ -76,6 +77,7 @@ app.use('/api/upload', uploadRouter)
 app.use('/api/subscriptions', subscriptionsRouter)
 app.use('/api/analytics', analyticsRouter)
 app.use('/api/favorites', favoritesRouter)
+app.use('/api/ai', aiRouter)
 
 // SEO: dynamic sitemap + crawler-only prerendered OG pages.
 // nginx routes /sitemap.xml and known-bot requests here — see nginx.conf.

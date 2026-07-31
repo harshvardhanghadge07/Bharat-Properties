@@ -91,4 +91,8 @@ export const analyticsApi = {
   getOverview: () => api.get('/analytics/overview'),
 }
 
+export const aiApi = {
+  chat: (message) => api.post('/ai/chat', { message }),
+}
+
 export default api

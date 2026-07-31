@@ -30,6 +30,7 @@ import AdminSubscriptions from './pages/Admin/Subscriptions'
 import ProtectedRoute from './components/ui/ProtectedRoute'
 import ScrollToTop from './components/ui/ScrollToTop'
 import CookieConsent from './components/ui/CookieConsent'
+import AIChatbot from './components/ui/AIChatbot'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -76,6 +77,7 @@ export default function App() {
       </Routes>
       <Footer />
       <CookieConsent />
+      <AIChatbot />
     </BrowserRouter>
   )
 }
