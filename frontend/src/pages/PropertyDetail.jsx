@@ -65,8 +65,9 @@ export default function PropertyDetail() {
 
   const images = property.images?.length ? property.images : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800']
 
-  // WhatsApp inquiry — prefilled with property details, opens a chat with the agent number
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919359854302'
+  // WhatsApp inquiry — prefilled with property details, opens a chat with 919359854302
+  const envPhone = (import.meta.env.VITE_WHATSAPP_NUMBER || '').replace(/\D/g, '')
+  const whatsappNumber = envPhone && envPhone !== '918484900257' ? envPhone : '919359854302'
   const whatsappMessage = encodeURIComponent(
     `Hi, I'm interested in "${property.title}" (${property.location}, ${property.city}) listed at ${formatPrice(property.price)}. Is it still available?`
   )
