@@ -56,15 +56,16 @@ const getFromAddress = () =>
 
 // ─── Generic send helper ───────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html, devLog }) => {
-  // 1. Try Brevo SMTP first (works on Render)
-  const brevo = getBrevoTransporter()
-  if (brevo) {
+  // 1. Try Gmail SMTP first (working app password & direct delivery)
+  const gmail = getGmailTransporter()
+  if (gmail) {
     try {
-      await brevo.sendMail({ from: getFromAddress(), to, subject, html })
-      console.log(`✅ Email sent via Brevo to: ${to}`)
+      const from = process.env.EMAIL_FROM || process.env.EMAIL_USER
+      await gmail.sendMail({ from, to, subject, html })
+      console.log(`✅ Email sent via Gmail SMTP to: ${to}`)
       return
     } catch (err) {
-      console.error('⚠️  Brevo SMTP failed:', err.message, '— trying fallback...')
+      console.error('⚠️  Gmail SMTP failed:', err.message, '— trying fallback...')
     }
   }
 
@@ -72,7 +73,8 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
   const resend = getResend()
   if (resend) {
     try {
-      const { error } = await resend.emails.send({ from: getFromAddress(), to, subject, html })
+      const from = process.env.RESEND_FROM || 'onboarding@resend.dev'
+      const { error } = await resend.emails.send({ from, to, subject, html })
       if (error) throw new Error(error.message)
       console.log(`✅ Email sent via Resend to: ${to}`)
       return
@@ -81,16 +83,21 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
     }
   }
 
-  // 3. Try Gmail SMTP (local dev)
-  const gmail = getGmailTransporter()
-  if (gmail) {
-    await gmail.sendMail({ from: getFromAddress(), to, subject, html })
-    console.log(`✅ Email sent via Gmail SMTP to: ${to}`)
-    return
+  // 3. Try Brevo SMTP
+  const brevo = getBrevoTransporter()
+  if (brevo) {
+    try {
+      const from = process.env.BREVO_FROM || 'noreply@bharatproperties.in'
+      await brevo.sendMail({ from, to, subject, html })
+      console.log(`✅ Email sent via Brevo to: ${to}`)
+      return
+    } catch (err) {
+      console.error('⚠️  Brevo SMTP failed:', err.message, '— trying fallback...')
+    }
   }
 
-  // 4. Nothing configured — dev mode
-  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Set BREVO_SMTP_USER/BREVO_SMTP_PASS in .env to send real emails)\n`)
+  // 4. Nothing configured or all failed — dev mode
+  console.log(`\n📧 [DEV MODE] ${devLog}\n   (Configure EMAIL_USER/EMAIL_PASS in .env to send real emails)\n`)
 }
 
 // ─── Public helpers ────────────────────────────────────────────────────────
