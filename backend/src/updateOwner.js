@@ -9,7 +9,7 @@ import User from './models/User.js'
 dotenv.config()
 
 const OWNER = {
-  name: 'Harshvardhan Ghadge',
+  name: 'Tanuj Misal',
   email: 'bharatestates3@gmail.com',
   password: 'kedarnath3',
   phone: '',
