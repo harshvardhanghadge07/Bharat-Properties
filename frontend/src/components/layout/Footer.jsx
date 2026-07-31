@@ -77,7 +77,7 @@ export default function Footer() {
           </p>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2"><Phone size={14} className="text-primary-500" /> +91 9359854302</div>
-            <div className="flex items-center gap-2"><Mail size={14} className="text-primary-500" /> harshvardhanghadge134@gmail.com</div>
+            <div className="flex items-center gap-2"><Mail size={14} className="text-primary-500" /> bharatestates3@gmail.com</div>
             <div className="flex items-center gap-2"><MapPin size={14} className="text-primary-500" /> Jalna - 431203, Maharashtra</div>
           </div>
         </div>

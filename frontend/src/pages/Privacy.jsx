@@ -37,7 +37,7 @@ const SECTIONS = [
   },
   {
     title: '9. Contact Us',
-    body: `For any privacy-related questions or data requests, please contact us at harshvardhanghadge134@gmail.com or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
+    body: `For any privacy-related questions or data requests, please contact us at bharatestates3@gmail.com or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
   },
 ]
 

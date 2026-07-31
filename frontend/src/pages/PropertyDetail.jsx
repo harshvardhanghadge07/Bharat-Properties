@@ -293,8 +293,8 @@ export default function PropertyDetail() {
                 <a href="tel:+919359854302" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
                   <Phone size={15} className="text-primary-500" /> +919359854302
                 </a>
-                <a href="mailto:harshvardhanghadge134@gmail.com" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
-                  <Mail size={15} className="text-primary-500" /> harshvardhanghadge134@gmail.com
+                <a href="mailto:bharatestates3@gmail.com" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
+                  <Mail size={15} className="text-primary-500" /> bharatestates3@gmail.com
                 </a>
               </div>
             </div>

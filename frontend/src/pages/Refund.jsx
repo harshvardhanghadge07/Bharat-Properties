@@ -17,7 +17,7 @@ const SECTIONS = [
   },
   {
     title: '4. How to Request a Refund',
-    body: `To request a refund, email harshvardhanghadge134@gmail.com  within 7 days of the charge, including your registered email address and the payment ID from your Razorpay receipt. We aim to respond to all refund requests within 5 business days.`,
+    body: `To request a refund, email bharatestates3@gmail.com  within 7 days of the charge, including your registered email address and the payment ID from your Razorpay receipt. We aim to respond to all refund requests within 5 business days.`,
   },
   {
     title: '5. Refund Processing Time',
@@ -29,7 +29,7 @@ const SECTIONS = [
   },
   {
     title: '7. Contact Us',
-    body: `For any billing or refund questions, reach us at  harshvardhanghadge134@gmail.com  or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
+    body: `For any billing or refund questions, reach us at  bharatestates3@gmail.com  or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
   },
 ]
 
