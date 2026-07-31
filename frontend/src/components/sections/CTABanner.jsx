@@ -25,7 +25,7 @@ export default function CTABanner() {
           <Link to="/properties" className="bg-white text-primary-500 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all flex items-center gap-2">
             Browse Properties <ArrowRight size={18} />
           </Link>
-          <a href="tel:+918484900257" className="border-2 border-white text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition-all flex items-center gap-2">
+          <a href="tel:+919359854302" className="border-2 border-white text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition-all flex items-center gap-2">
             <PhoneCall size={18} /> Call an Expert
           </a>
         </div>

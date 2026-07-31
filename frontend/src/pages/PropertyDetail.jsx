@@ -66,7 +66,7 @@ export default function PropertyDetail() {
   const images = property.images?.length ? property.images : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800']
 
   // WhatsApp inquiry — prefilled with property details, opens a chat with the agent number
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '918484900257'
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919359854302'
   const whatsappMessage = encodeURIComponent(
     `Hi, I'm interested in "${property.title}" (${property.location}, ${property.city}) listed at ${formatPrice(property.price)}. Is it still available?`
   )
@@ -290,8 +290,8 @@ export default function PropertyDetail() {
 
               {/* Phone */}
               <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                <a href="tel:+918484900257" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
-                  <Phone size={15} className="text-primary-500" /> +918484900257
+                <a href="tel:+919359854302" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
+                  <Phone size={15} className="text-primary-500" /> +919359854302
                 </a>
                 <a href="mailto:harshvardhanghadge134@gmail.com" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
                   <Mail size={15} className="text-primary-500" /> harshvardhanghadge134@gmail.com

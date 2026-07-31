@@ -379,7 +379,7 @@ export default function Support() {
               </p>
             </div>
             <a
-              href="https://wa.me/918484900257?text=Hi%20Bharat%20Properties%20Support,%20I%20need%20help%20with..."
+              href="https://wa.me/919359854302?text=Hi%20Bharat%20Properties%20Support,%20I%20need%20help%20with..."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors shadow-sm"
@@ -419,10 +419,10 @@ export default function Support() {
               </p>
             </div>
             <a
-              href="tel:+918484900257"
+              href="tel:+919359854302"
               className="inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors"
             >
-              +91 8484900257
+              +91 9359854302
             </a>
           </div>
         </div>

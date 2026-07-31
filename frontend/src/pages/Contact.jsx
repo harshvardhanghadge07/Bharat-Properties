@@ -36,7 +36,7 @@ export default function Contact() {
         {/* Info */}
         <div className="space-y-6">
           {[
-            { icon: Phone,   title: 'Phone',   info: '+918484900257', sub: 'Mon–Sat, 9am–7pm' },
+            { icon: Phone,   title: 'Phone',   info: '+919359854302', sub: 'Mon–Sat, 9am–7pm' },
             { icon: Mail,    title: 'Email',   info: 'harshvardhanghadge134@gmail.com', sub: 'Reply within 24 hours' },
             { icon: MapPin,  title: 'Office',  info: ' Jalna - 431203', sub: 'Maharashtra, India' },
             { icon: Clock,   title: 'Hours',   info: 'Mon–Sat: 9am – 7pm', sub: 'Sun: 10am – 4pm' },

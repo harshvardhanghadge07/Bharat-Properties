@@ -29,7 +29,7 @@ const SECTIONS = [
   },
   {
     title: '7. Contact Us',
-    body: `For any billing or refund questions, reach us at  harshvardhanghadge134@gmail.com  or +918484900257, or write to us at  Jalna - 431203, Maharashtra, India.`,
+    body: `For any billing or refund questions, reach us at  harshvardhanghadge134@gmail.com  or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
   },
 ]
 
