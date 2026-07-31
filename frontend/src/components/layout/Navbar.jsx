@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, User, LogOut, Building2, LayoutDashboard, Heart } from 'lucide-react'
+import { Menu, X, ChevronDown, User, LogOut, Building2, LayoutDashboard, Heart, Shield } from 'lucide-react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { getInitials } from '../../utils/helpers'
 
@@ -100,6 +100,9 @@ export default function Navbar() {
                       </Link>
                       <Link to="/favorites" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                         <Heart size={15} /> My Favorites
+                      </Link>
+                      <Link to="/terms" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                        <Shield size={15} /> Legal & Policies
                       </Link>
                       <hr className="my-1" />
                       <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50">

@@ -311,6 +311,60 @@ export default function Support() {
           )}
         </div>
 
+        {/* Legal & Compliance Hub Section */}
+        <div className="bg-gradient-to-r from-slate-900 to-gray-900 text-white rounded-2xl p-6 md:p-8 shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-orange-400 uppercase tracking-wider mb-1">
+                <ShieldCheck size={14} /> Trust & Transparency
+              </div>
+              <h2 className="text-xl font-serif font-bold">Legal Policies & Agreement Documents</h2>
+              <p className="text-xs text-gray-400 mt-1">Review our terms of use, privacy protections, and refund guarantees.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              to="/terms"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 transition-all group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-sm text-white group-hover:text-primary-400 transition-colors">Terms of Service</span>
+                <ExternalLink size={14} className="text-gray-400 group-hover:text-white" />
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Platform usage guidelines, seller responsibilities, and buyer/renter rights.
+              </p>
+            </Link>
+
+            <Link
+              to="/privacy"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 transition-all group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-sm text-white group-hover:text-primary-400 transition-colors">Privacy Policy</span>
+                <ExternalLink size={14} className="text-gray-400 group-hover:text-white" />
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                How we protect your personal data, secure contact information, and handle analytics.
+              </p>
+            </Link>
+
+            <Link
+              to="/refund"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 transition-all group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-sm text-white group-hover:text-primary-400 transition-colors">Refund & Cancellation</span>
+                <ExternalLink size={14} className="text-gray-400 group-hover:text-white" />
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Subscription refund criteria, Razorpay payment processing, and billing FAQs.
+              </p>
+            </Link>
+          </div>
+        </div>
+
         {/* Direct Contact & Live Support Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* WhatsApp Support Card */}

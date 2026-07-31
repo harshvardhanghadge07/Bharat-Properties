@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
+import LegalNav from '../components/ui/LegalNav'
 
 const SECTIONS = [
   {
@@ -42,8 +43,9 @@ const SECTIONS = [
 
 export default function Privacy() {
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-6 py-14">
+    <div className="pt-16 min-h-screen bg-gray-50/50 pb-16">
+      <LegalNav />
+      <div className="max-w-3xl mx-auto px-6 py-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
           <p className="text-sm text-gray-400 mb-6">Last updated: July 2026</p>
