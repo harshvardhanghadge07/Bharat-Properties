@@ -28,6 +28,7 @@ import AdminAnalytics from './pages/Admin/Analytics'
 import AdminSubscriptions from './pages/Admin/Subscriptions'
 import ProtectedRoute from './components/ui/ProtectedRoute'
 import ScrollToTop from './components/ui/ScrollToTop'
+import CookieConsent from './components/ui/CookieConsent'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <CookieConsent />
     </BrowserRouter>
   )
 }
