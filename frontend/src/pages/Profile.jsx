@@ -32,18 +32,7 @@ export default function Profile() {
   const emailChanged = form.email.trim().toLowerCase() !== (user?.email || '').toLowerCase()
   const wantsPasswordChange = newPassword.length > 0
 
-  const handleResendVerification = async () => {
-    setResending(true)
-    try {
-      await authApi.resendVerification()
-      setResent(true)
-      setTimeout(() => setResent(false), 5000)
-    } catch (err) {
-      setError(err.error || 'Failed to send verification email.')
-    } finally {
-      setResending(false)
-    }
-  }
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -166,25 +155,7 @@ export default function Profile() {
               {emailChanged && (
                 <p className="text-xs text-amber-600 mt-1">Changing your email requires your current password below.</p>
               )}
-              {!emailChanged && user?.email && (
-                user?.emailVerified ? (
-                  <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                    <CheckCircle2 size={12} /> Verified
-                  </p>
-                ) : (
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-amber-600">Not verified yet</p>
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      disabled={resending}
-                      className="text-xs text-primary-500 font-medium hover:underline disabled:opacity-50"
-                    >
-                      {resending ? 'Sending…' : resent ? 'Sent!' : 'Resend verification email'}
-                    </button>
-                  </div>
-                )
-              )}
+
             </div>
 
             {/* Security section — expandable, for changing password */}

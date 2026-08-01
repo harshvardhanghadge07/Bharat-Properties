@@ -24,8 +24,6 @@ export default function PostProperty() {
   const [amenityInput, setAmenityInput] = useState('')
   const [success, setSuccess] = useState(false)
   const [limitError, setLimitError] = useState(null)
-  const [verificationError, setVerificationError] = useState(null)
-  const [resendState, setResendState] = useState('idle') // idle | sending | sent
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
@@ -69,7 +67,6 @@ const createMut = useMutation({
     },
     onError: (err) => {
       if (err.upgradeRequired) setLimitError(err)
-      else if (err.code === 'VERIFICATION_REQUIRED') setVerificationError(err)
       else alert(err.error || 'Failed to create listing')
     },
   })
@@ -141,37 +138,6 @@ const createMut = useMutation({
         <Link to="/pricing" className="btn-primary inline-flex items-center gap-2">
           <Crown size={16} /> View Plans
         </Link>
-      </div>
-    )
-  }
-
-  if (verificationError) {
-    const handleResend = async () => {
-      setResendState('sending')
-      try {
-        await authApi.resendVerification()
-        setResendState('sent')
-      } catch {
-        setResendState('idle')
-        alert('Could not resend the verification email. Please try again shortly.')
-      }
-    }
-    return (
-      <div className="pt-32 pb-20 text-center max-w-md mx-auto px-4">
-        <AlertCircle size={64} className="text-primary-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email First</h2>
-        <p className="text-gray-500 mb-6">{verificationError.error}</p>
-        {resendState === 'sent' ? (
-          <p className="text-green-600 font-medium">Verification email sent — check your inbox.</p>
-        ) : (
-          <button
-            onClick={handleResend}
-            disabled={resendState === 'sending'}
-            className="btn-primary inline-flex items-center gap-2"
-          >
-            {resendState === 'sending' ? 'Sending…' : 'Resend Verification Email'}
-          </button>
-        )}
       </div>
     )
   }

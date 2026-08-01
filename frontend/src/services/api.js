@@ -50,6 +50,7 @@ export const favoriteApi = {
 export const authApi = {
   login:          (d) => api.post('/auth/login', d),
   register:       (d) => api.post('/auth/register', d),
+  googleLogin:    (credential) => api.post('/auth/google', { credential }),
   me:             ()  => api.get('/auth/me'),
   update:         (d) => api.put('/auth/me', d),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),

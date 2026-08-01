@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, Eye, EyeOff, MailCheck } from 'lucide-react'
+import { Building2, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { authApi } from '../services/api'
+import GoogleAuthButton from '../components/ui/GoogleAuthButton'
 
 export default function Register() {
-  const navigate = useNavigate()
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 pt-16">
       <motion.div
@@ -23,6 +21,17 @@ export default function Register() {
           <p className="text-gray-500 text-sm mt-1">Join Bharat Properties today</p>
         </div>
 
+        <GoogleAuthButton redirect="/" />
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-3 text-gray-400 font-medium">Or continue with email</span>
+          </div>
+        </div>
+
         <EmailRegisterForm />
 
         <p className="text-center text-sm text-gray-500 mt-6">
@@ -34,46 +43,9 @@ export default function Register() {
   )
 }
 
-function CheckYourEmail({ email }) {
-  const [resendState, setResendState] = useState('idle') // idle | sending | sent
-
-  const handleResend = async () => {
-    setResendState('sending')
-    try {
-      await authApi.resendVerification(email)
-      setResendState('sent')
-    } catch {
-      setResendState('idle')
-    }
-  }
-
-  return (
-    <div className="text-center py-4">
-      <MailCheck size={48} className="text-primary-500 mx-auto mb-4" />
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Check your email</h2>
-      <p className="text-gray-500 text-sm mb-6">
-        We've sent a verification link to <b>{email}</b>. Click it to activate your account, then sign in.
-      </p>
-      {resendState === 'sent' ? (
-        <p className="text-green-600 text-sm font-medium">Verification email sent again — check your inbox.</p>
-      ) : (
-        <button
-          onClick={handleResend}
-          disabled={resendState === 'sending'}
-          className="text-sm text-primary-500 font-medium hover:underline"
-        >
-          {resendState === 'sending' ? 'Sending…' : "Didn't get it? Resend the link"}
-        </button>
-      )}
-    </div>
-  )
-}
-
 // ─────────────────────────────────────────────────────
 // Email Registration Form
 // ─────────────────────────────────────────────────────
-// Same rules as the backend (backend/src/models/User.js) — kept in sync so
-// obviously-fake input is caught instantly instead of round-tripping to the server.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_RE = /^[6-9]\d{9}$/
 const normalizePhone = (v) => v.trim().replace(/[\s-]/g, '').replace(/^(\+91|91|0)/, '')
@@ -83,7 +55,6 @@ function EmailRegisterForm() {
   const [showPw, setShowPw] = useState(false)
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
-  const [pendingVerification, setPendingVerification] = useState(null) // email string once shown
   const { register } = useAuthStore()
   const navigate = useNavigate()
 
@@ -104,21 +75,13 @@ function EmailRegisterForm() {
     setLoading(true)
     try {
       const email = form.email.trim().toLowerCase()
-      const result = await register({ ...form, email, phone: phone || undefined })
-      if (result.requiresVerification) {
-        setPendingVerification(email)
-      } else {
-        navigate('/')
-      }
+      await register({ ...form, email, phone: phone || undefined })
+      navigate('/')
     } catch (err) {
       setError(err.error || 'Registration failed.')
     } finally {
       setLoading(false)
     }
-  }
-
-  if (pendingVerification) {
-    return <CheckYourEmail email={pendingVerification} />
   }
 
   return (

@@ -32,16 +32,9 @@ export const requireAdmin = (req, res, next) => {
 // so the account stays unverified and stays blocked from posting.
 export const requireVerifiedContact = (req, res, next) => {
   const user = req.user
-  if (user.role === 'ADMIN') return next()
-
-  const hasVerifiedEmail = !!(user.email && user.emailVerified)
-  const hasVerifiedPhone = !!(user.phone && user.phoneVerified)
-
-  if (!hasVerifiedEmail && !hasVerifiedPhone) {
+  if (!user.email && !user.phone) {
     return res.status(403).json({
-      error: user.email
-        ? 'Please verify your email before posting a listing. Check your inbox for the verification link, or resend it from your profile.'
-        : 'Please add and verify an email address before posting a listing.',
+      error: 'Please add contact information to your profile before posting a listing.',
       code: 'VERIFICATION_REQUIRED',
     })
   }

@@ -1,6 +1,6 @@
 import express from 'express'
 import rateLimit from 'express-rate-limit'
-import { register, login, getMe, updateProfile, forgotPassword, resetPassword, verifyEmail, resendVerification, searchUsers } from '../controllers/authController.js'
+import { register, login, googleAuth, getMe, updateProfile, forgotPassword, resetPassword, verifyEmail, resendVerification, searchUsers } from '../controllers/authController.js'
 import { authenticate, requireAdmin, attachUserIfPresent } from '../middleware/auth.js'
 
 const router = express.Router()
@@ -20,6 +20,7 @@ const verificationLimiter = rateLimit({
 
 router.post('/register', register)
 router.post('/login',    login)
+router.post('/google',   googleAuth)
 router.get('/me',        authenticate, getMe)
 router.put('/me',        authenticate, updateProfile)
 

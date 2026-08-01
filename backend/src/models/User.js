@@ -38,10 +38,14 @@ const userSchema = new mongoose.Schema({
   },
   phoneVerified: { type: Boolean, default: false },
 
-  // Email verification (only relevant for accounts that have an email)
-  emailVerified:           { type: Boolean, default: false },
+  // Email verification (defaults to true; verification email requirement removed)
+  emailVerified:           { type: Boolean, default: true },
   emailVerificationToken:  { type: String, select: false, default: null },
   emailVerificationExpires:{ type: Date,   select: false, default: null },
+
+  // OAuth & profile details
+  googleId: { type: String, unique: true, sparse: true },
+  avatar:   { type: String, default: null },
 
   role: { type: String, enum: ['USER', 'ADMIN'], default: 'USER' },
 

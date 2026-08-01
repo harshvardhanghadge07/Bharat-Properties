@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, Eye, EyeOff, Mail, ArrowLeft } from 'lucide-react'
+import { Building2, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { authApi } from '../services/api'
+import GoogleAuthButton from '../components/ui/GoogleAuthButton'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -25,6 +25,17 @@ export default function Login() {
           <p className="text-gray-500 text-sm mt-1">Sign in to Bharat Properties</p>
         </div>
 
+        <GoogleAuthButton redirect={redirect} />
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-3 text-gray-400 font-medium">Or continue with email</span>
+          </div>
+        </div>
+
         <EmailLoginForm redirect={redirect} />
 
         <p className="text-center text-sm text-gray-500 mt-6">
@@ -41,8 +52,6 @@ function EmailLoginForm({ redirect }) {
   const [form, setForm]     = useState({ email: '', password: '' })
   const [showPw, setShowPw] = useState(false)
   const [error, setError]   = useState('')
-  const [needsVerification, setNeedsVerification] = useState(false)
-  const [resendState, setResendState] = useState('idle') // idle | sending | sent
   const [loading, setLoading] = useState(false)
   const { login } = useAuthStore()
   const navigate = useNavigate()
@@ -50,54 +59,15 @@ function EmailLoginForm({ redirect }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setNeedsVerification(false)
     setLoading(true)
     try {
       const user = await login(form)
       navigate(user.role === 'ADMIN' ? '/admin' : redirect)
     } catch (err) {
-      if (err.code === 'EMAIL_NOT_VERIFIED') {
-        setNeedsVerification(true)
-        setResendState('idle')
-      } else {
-        setError(err.error || 'Login failed. Please try again.')
-      }
+      setError(err.error || 'Login failed. Please try again.')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleResend = async () => {
-    setResendState('sending')
-    try {
-      await authApi.resendVerification(form.email.trim().toLowerCase())
-      setResendState('sent')
-    } catch {
-      setResendState('idle')
-    }
-  }
-
-  if (needsVerification) {
-    return (
-      <div className="text-center py-4">
-        <Mail size={40} className="text-primary-500 mx-auto mb-4" />
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Please verify your email</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          Check <b>{form.email}</b> for the verification link, then come back and sign in.
-        </p>
-        {resendState === 'sent' ? (
-          <p className="text-green-600 text-sm font-medium mb-4">Verification email sent — check your inbox.</p>
-        ) : (
-          <button onClick={handleResend} disabled={resendState === 'sending'}
-            className="text-sm text-primary-500 font-medium hover:underline mb-4 block mx-auto">
-            {resendState === 'sending' ? 'Sending…' : "Didn't get it? Resend the link"}
-          </button>
-        )}
-        <button onClick={() => setNeedsVerification(false)} className="text-sm text-gray-500 hover:underline">
-          ← Back to sign in
-        </button>
-      </div>
-    )
   }
 
   return (

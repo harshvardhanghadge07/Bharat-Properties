@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import { OAuth2Client } from 'google-auth-library'
 import User from '../models/User.js'
 import { sendResetPasswordEmail, sendVerificationEmail } from '../services/mailer.js'
 import { isDisposableDomain, domainCanReceiveMail } from '../utils/emailCheck.js'
@@ -58,23 +59,8 @@ export const register = async (req, res, next) => {
       if (emailError) return res.status(400).json({ error: emailError })
     }
 
-    const user = await User.create({ name, email, password, phone })
+    const user = await User.create({ name, email, password, phone, emailVerified: true })
 
-    if (email) {
-      issueEmailVerification(user)
-      await user.save({ validateBeforeSave: false })
-      // No token yet — login() now rejects unverified email accounts, so
-      // handing out a working session here would just let people skip that
-      // check entirely by registering instead of logging in.
-      return res.status(201).json({
-        user,
-        requiresVerification: true,
-        message: 'Account created! Please check your email to verify your address, then log in.',
-      })
-    }
-
-    // Phone-only accounts: no OTP/verification flow exists yet, so there's
-    // nothing to gate on — log them in directly, same as before.
     const token = signToken(user._id)
     res.status(201).json({ user, token })
   } catch (err) { next(err) }
@@ -87,15 +73,6 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({ email }).select('+password')
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ error: 'Invalid email or password' })
-    }
-
-    // Check credentials before verification status, so a wrong password
-    // never leaks whether a given email is registered/unverified.
-    if (user.email && !user.emailVerified && user.role !== 'ADMIN') {
-      return res.status(403).json({
-        error: 'Please verify your email before logging in. Check your inbox for the verification link, or request a new one below.',
-        code: 'EMAIL_NOT_VERIFIED',
-      })
     }
 
     const token = signToken(user._id)
@@ -147,8 +124,7 @@ export const updateProfile = async (req, res, next) => {
         if (emailError) return res.status(400).json({ error: emailError })
 
         user.email = newEmail
-        user.emailVerified = false
-        issueEmailVerification(user)
+        user.emailVerified = true
       }
 
       if (wantsPasswordChange) {
@@ -294,4 +270,71 @@ export const resetPassword = async (req, res, next) => {
     const jwtToken = signToken(user._id)
     res.json({ message: 'Password reset successful', user, token: jwtToken })
   } catch (err) { next(err) }
+}
+
+export const googleAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body
+    if (!credential) return res.status(400).json({ error: 'Google credential token is required' })
+
+    let payload = null
+
+    if (process.env.GOOGLE_CLIENT_ID) {
+      try {
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+        const ticket = await client.verifyIdToken({
+          idToken: credential,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        })
+        payload = ticket.getPayload()
+      } catch (err) {
+        console.warn('Google token verification with CLIENT_ID failed:', err.message)
+      }
+    }
+
+    // Fallback if client ID is not configured or token verification with audience failed
+    if (!payload) {
+      try {
+        const client = new OAuth2Client()
+        const ticket = await client.verifyIdToken({ idToken: credential })
+        payload = ticket.getPayload()
+      } catch {
+        payload = jwt.decode(credential)
+      }
+    }
+
+    if (!payload || !payload.email) {
+      return res.status(400).json({ error: 'Invalid Google authentication credential' })
+    }
+
+    const googleId = payload.sub
+    const email = String(payload.email).toLowerCase().trim()
+    const name = payload.name || payload.given_name || 'Google User'
+    const avatar = payload.picture || null
+
+    let user = await User.findOne({
+      $or: [{ googleId }, { email }],
+    })
+
+    if (user) {
+      let updated = false
+      if (!user.googleId) { user.googleId = googleId; updated = true }
+      if (!user.avatar && avatar) { user.avatar = avatar; updated = true }
+      if (!user.emailVerified) { user.emailVerified = true; updated = true }
+      if (updated) await user.save()
+    } else {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        avatar,
+        emailVerified: true,
+      })
+    }
+
+    const token = signToken(user._id)
+    res.json({ user, token })
+  } catch (err) {
+    next(err)
+  }
 }

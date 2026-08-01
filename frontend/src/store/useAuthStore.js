@@ -26,6 +26,13 @@ export const useAuthStore = create(
         return res
       },
 
+      googleLogin: async (credential) => {
+        const { user, token } = await authApi.googleLogin(credential)
+        localStorage.setItem('bp_token', token)
+        set({ user, token, isAuthenticated: true })
+        return user
+      },
+
       logout: () => {
         localStorage.removeItem('bp_token')
         set({ user: null, token: null, isAuthenticated: false })
