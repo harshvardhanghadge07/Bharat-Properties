@@ -57,16 +57,40 @@ export default function About() {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-primary-500 font-semibold uppercase tracking-wider text-sm mb-2">Our People</p>
           <h2 className="section-heading mb-6">Meet the Team</h2>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-gray-50 rounded-2xl p-10"
-          >
-            <Sparkles size={28} className="text-primary-400 mx-auto mb-4" />
-            <p className="text-gray-600">Team bios coming soon.</p>
-            <p className="text-gray-400 text-sm mt-1">We're growing — check back here to meet the people behind Bharat Properties.</p>
-          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-md transition-shadow"
+            >
+              <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                TM
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Tanuj Misal</h3>
+              <p className="text-primary-600 font-medium text-sm mb-3">Real Estate & Finance</p>
+              <p className="text-gray-600 text-sm">
+                Bringing over 6 years of deep expertise in real estate markets and financial structuring to help you make the best property investments.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-md transition-shadow"
+            >
+              <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                HG
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Harshvardhan Ghadge</h3>
+              <p className="text-primary-600 font-medium text-sm mb-3">Technology</p>
+              <p className="text-gray-600 text-sm">
+                With 2 years of experience building modern technology platforms, driving the digital experience and innovation behind Bharat Properties.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
     </div>
