@@ -1,7 +1,7 @@
 import Property from '../models/Property.js'
 
 const SITE_NAME = 'Bharat Properties'
-const clientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '')
+const clientUrl = () => (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173').replace(/\/$/, '')
 
 const escapeXml = (str = '') =>
   String(str).replace(/[<>&'"]/g, (c) => ({ '<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;' }[c]))

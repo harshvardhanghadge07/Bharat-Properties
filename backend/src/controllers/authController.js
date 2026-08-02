@@ -37,7 +37,7 @@ const issueEmailVerification = (user) => {
   user.emailVerificationToken = hashedToken
   user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
+  const clientUrl = req.headers.origin || (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173')
   const verifyUrl = `${clientUrl}/verify-email/${rawToken}`
 
   sendVerificationEmail(user, verifyUrl).catch((err) =>
@@ -214,7 +214,7 @@ export const forgotPassword = async (req, res, next) => {
     user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_EXPIRY_MINUTES * 60 * 1000)
     await user.save({ validateBeforeSave: false })
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
+    const clientUrl = req.headers.origin || (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173')
     const resetUrl = `${clientUrl}/reset-password/${rawToken}`
 
     // Fire-and-forget — respond immediately so a slow/blocked SMTP on cloud
