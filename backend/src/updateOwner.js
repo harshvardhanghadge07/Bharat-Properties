@@ -20,11 +20,11 @@ async function updateOwner() {
   await mongoose.connect(process.env.MONGO_URI)
   console.log('✅ Connected to MongoDB')
 
-  // Remove old default admin if it exists (admin@bharatproperties.com)
-  const oldAdmin = await User.findOne({ email: 'admin@bharatproperties.com' })
+  // Remove old default admin if it exists (admin@bharat-realestate.com)
+  const oldAdmin = await User.findOne({ email: 'admin@bharat-realestate.com' })
   if (oldAdmin) {
-    await User.deleteOne({ email: 'admin@bharatproperties.com' })
-    console.log('🗑️  Removed old default admin (admin@bharatproperties.com)')
+    await User.deleteOne({ email: 'admin@bharat-realestate.com' })
+    console.log('🗑️  Removed old default admin (admin@bharat-realestate.com)')
   }
 
   // Check if your email already exists

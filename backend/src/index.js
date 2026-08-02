@@ -29,7 +29,7 @@ app.set('trust proxy', 1)
 
 // --- CORS setup -------------------------------------------------------
 // CLIENT_URL can hold one or more comma-separated origins, e.g.:
-//   CLIENT_URL=https://bharat-properties-ten.vercel.app,http://localhost:5173
+//   CLIENT_URL=https://bharat-realestate.com,http://localhost:5173
 // Each entry is trimmed to strip any stray whitespace/newlines that sneak
 // in via copy-paste into Render's env var dashboard — an untrimmed value
 // causes Node to throw "Invalid character in header content" when it

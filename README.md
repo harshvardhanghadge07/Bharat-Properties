@@ -8,7 +8,7 @@ Same full-stack real estate portal, now powered by **MongoDB + Mongoose** instea
 
 | Service   | URL                                                                 |
 |-----------|----------------------------------------------------------------------|
-| Frontend  | [https://bharat-properties-ten.vercel.app](https://bharat-properties-ten.vercel.app) |
+| Frontend  | [https://bharat-realestate.com](https://bharat-realestate.com) |
 | Backend API | [https://bharat-backend-3p58.onrender.com](https://bharat-backend-3p58.onrender.com) |
 | Health check | [https://bharat-backend-3p58.onrender.com/api/health](https://bharat-backend-3p58.onrender.com/api/health) |
 
@@ -67,8 +67,8 @@ PORT=4000
 ```
 
 > In production (Render), `CLIENT_URL` should be set to the deployed frontend URL, e.g.
-> `CLIENT_URL=https://bharat-properties-ten.vercel.app`
-> Multiple origins can be comma-separated: `CLIENT_URL=https://bharat-properties-ten.vercel.app,http://localhost:5173`
+> `CLIENT_URL=https://bharat-realestate.com`
+> Multiple origins can be comma-separated: `CLIENT_URL=https://bharat-realestate.com,http://localhost:5173`
 
 Seed the database:
 ```bash
@@ -111,7 +111,7 @@ Open http://localhost:5173 🎉
 Running `node src/seed.js` creates one admin account and prints its password **once**, to the terminal — it's randomly generated each time, not fixed, so save it when you see it:
 
 ```
-📧 Admin: admin@bharatproperties.com
+📧 Admin: admin@bharat-realestate.com
 🔑 Password: <random — shown only at seed time>
 ```
 

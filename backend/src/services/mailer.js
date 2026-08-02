@@ -52,7 +52,7 @@ const getFromAddress = () =>
   process.env.RESEND_FROM ||
   process.env.EMAIL_FROM ||
   process.env.EMAIL_USER ||
-  'noreply@bharatproperties.in'
+  'noreply@bharat-realestate.com'
 
 // ─── Generic send helper ───────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html, devLog }) => {

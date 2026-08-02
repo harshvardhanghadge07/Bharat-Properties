@@ -111,7 +111,7 @@ async function seed() {
   // Create admin — password is randomly generated each run (or set SEED_ADMIN_PASSWORD
   // yourself) rather than a fixed, publicly-documented value, since a hardcoded
   // "admin123" in source control/README is a real account-takeover risk.
-  const adminEmail    = process.env.SEED_ADMIN_EMAIL || 'admin@bharatproperties.com'
+  const adminEmail    = process.env.SEED_ADMIN_EMAIL || 'admin@bharat-realestate.com'
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || crypto.randomBytes(9).toString('base64url')
 
   await User.create({
