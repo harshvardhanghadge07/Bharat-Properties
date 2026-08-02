@@ -30,7 +30,7 @@ export default function FeaturedProperties() {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading
-            ? Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-72 rounded-xl" />)
+            ? Array(10).fill(0).map((_, i) => <Skeleton key={i} className="h-72 rounded-xl" />)
             : data?.map((p, i) => (
               <motion.div
                 key={p.id}

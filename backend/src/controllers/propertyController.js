@@ -140,8 +140,8 @@ export const getProperty = async (req, res, next) => {
 
 export const getFeaturedProperties = async (req, res, next) => {
   try {
-    const properties = await Property.find({ featured: true, status: 'ACTIVE' })
-      .sort({ createdAt: -1 }).limit(6)
+    const properties = await Property.find({ status: 'ACTIVE' })
+      .sort({ createdAt: -1 }).limit(10)
       .populate('owner', 'name emailVerified phoneVerified')
       .lean()
     await attachOwnerPlans(properties)
