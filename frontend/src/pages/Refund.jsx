@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { AlertTriangle } from 'lucide-react'
+
 import LegalNav from '../components/ui/LegalNav'
 
 const SECTIONS = [
@@ -42,10 +42,7 @@ export default function Refund() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Refund & Cancellation Policy</h1>
           <p className="text-sm text-gray-400 mb-6">Last updated: July 2026</p>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-8 flex gap-2 text-xs text-amber-700">
-            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-            <span>This is a template Refund Policy for Bharat Properties and has not been reviewed by a lawyer. Razorpay requires a published refund policy for live merchant accounts — please have this reviewed by a qualified legal professional before going live.</span>
-          </div>
+
 
           <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 space-y-6">
             {SECTIONS.map((s) => (
