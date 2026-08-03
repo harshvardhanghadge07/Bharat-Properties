@@ -4,7 +4,7 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPrice } from '../../utils/helpers'
-import { Disc, Pentagon, RotateCcw, MapPin, Locate, Search, X, Loader2 } from 'lucide-react'
+import { Disc, Pentagon, RotateCcw, MapPin, Locate, Search, X, Loader2, Layers, Globe } from 'lucide-react'
 import L from 'leaflet'
 
 // Ensure L is globally available for leaflet-draw
@@ -167,7 +167,7 @@ function MapSearchBar() {
 }
 
 // Map Action Controller component for triggering drawing modes programmatically
-function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount }) {
+function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount, mapType, setMapType }) {
   const map = useMap()
 
   const handleLocateMe = () => {
@@ -205,6 +205,32 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount
   return (
     <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 map-control-overlay">
       <MapSearchBar />
+
+      {/* Layer Toggle: Street vs Satellite */}
+      <div className="bg-white/95 backdrop-blur-md p-1 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1 text-xs font-semibold text-gray-700">
+        <button
+          type="button"
+          onClick={() => setMapType('street')}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
+            mapType === 'street' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="Switch to Street Map view"
+        >
+          <Layers size={13} />
+          <span>Street</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMapType('satellite')}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
+            mapType === 'satellite' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="Switch to High-Res Satellite View"
+        >
+          <Globe size={13} />
+          <span>Satellite</span>
+        </button>
+      </div>
 
       <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
         <button
@@ -272,6 +298,7 @@ export default function MapSearch({ properties, onBoundsChange }) {
   const defaultZoom = 5
   
   const [polygon, setPolygon] = useState(null)
+  const [mapType, setMapType] = useState('street')
   const fgRef = useRef()
   
   const validProperties = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng))).filter(p => {
@@ -289,7 +316,6 @@ export default function MapSearch({ properties, onBoundsChange }) {
     }
     return true
   })
-
 
   const handlePolygonChange = (polyData, bounds) => {
     setPolygon(polyData)
@@ -358,8 +384,18 @@ export default function MapSearch({ properties, onBoundsChange }) {
         <MapResize />
         <ZoomControl position="bottomright" />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          key={mapType}
+          attribution={
+            mapType === 'satellite'
+              ? 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+              : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }
+          url={
+            mapType === 'satellite'
+              ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+              : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+          }
+          maxZoom={19}
         />
 
         <FeatureGroup ref={fgRef}>
@@ -393,6 +429,8 @@ export default function MapSearch({ properties, onBoundsChange }) {
           polygon={polygon} 
           onClearFilter={handleClearFilter}
           resultCount={validProperties.length}
+          mapType={mapType}
+          setMapType={setMapType}
         />
         
         {validProperties.map(property => (
