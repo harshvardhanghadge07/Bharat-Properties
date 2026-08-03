@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap, FeatureGroup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, FeatureGroup, ZoomControl } from 'react-leaflet'
 import { EditControl } from 'react-leaflet-draw'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import { useEffect, useState, useRef } from 'react'
@@ -352,9 +352,11 @@ export default function MapSearch({ properties, onBoundsChange }) {
         center={defaultCenter} 
         zoom={defaultZoom} 
         scrollWheelZoom={true} 
+        zoomControl={false}
         className="w-full h-full"
       >
         <MapResize />
+        <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
