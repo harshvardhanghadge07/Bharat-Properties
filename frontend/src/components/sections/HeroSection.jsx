@@ -93,9 +93,9 @@ export default function HeroSection() {
 
         {/* Search Box */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
-          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-visible sm:overflow-hidden">
+          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
           {/* Tabs */}
-          <div className="flex border-b border-white/20">
+          <div className="flex border-b border-white/20 rounded-t-2xl overflow-hidden">
             {TABS.map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
