@@ -166,8 +166,170 @@ function MapSearchBar() {
   )
 }
 
+// Interactive 3D Earth Globe Modal Component
+function EarthGlobeModal({ properties, onClose }) {
+  const canvasRef = useRef(null)
+  const [rotation, setRotation] = useState({ x: 0.2, y: 1.5 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  const validProps = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng)))
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const width = canvas.width
+    const height = canvas.height
+    const radius = Math.min(width, height) * 0.38
+    const cx = width / 2
+    const cy = height / 2
+
+    ctx.clearRect(0, 0, width, height)
+
+    // Deep Space Background
+    const spaceGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 2.2)
+    spaceGrad.addColorStop(0, 'rgba(15, 23, 42, 0.98)')
+    spaceGrad.addColorStop(1, 'rgba(2, 6, 23, 1)')
+    ctx.fillStyle = spaceGrad
+    ctx.fillRect(0, 0, width, height)
+
+    // Atmospheric Outer Glow
+    const atmosGrad = ctx.createRadialGradient(cx, cy, radius * 0.95, cx, cy, radius * 1.18)
+    atmosGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)')
+    atmosGrad.addColorStop(1, 'rgba(56, 189, 248, 0)')
+    ctx.beginPath()
+    ctx.arc(cx, cy, radius * 1.18, 0, Math.PI * 2)
+    ctx.fillStyle = atmosGrad
+    ctx.fill()
+
+    // 3D Earth Ocean Sphere
+    const oceanGrad = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.3, radius * 0.1, cx, cy, radius)
+    oceanGrad.addColorStop(0, '#1d4ed8')
+    oceanGrad.addColorStop(0.5, '#0f172a')
+    oceanGrad.addColorStop(1, '#020617')
+    ctx.beginPath()
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+    ctx.fillStyle = oceanGrad
+    ctx.fill()
+    ctx.strokeStyle = '#38bdf8'
+    ctx.lineWidth = 2
+    ctx.stroke()
+
+    // 3D Latitude Graticules
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)'
+    ctx.lineWidth = 1
+    for (let lat = -60; lat <= 60; lat += 20) {
+      ctx.beginPath()
+      const rLat = (lat * Math.PI) / 180
+      const yLine = cy - Math.sin(rLat) * radius
+      const rSub = Math.cos(rLat) * radius
+      ctx.ellipse(cx, yLine, rSub, Math.max(2, rSub * Math.sin(rotation.x)), 0, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+
+    // 3D Longitude Meridian Curves
+    for (let lng = 0; lng < 360; lng += 30) {
+      const radLng = ((lng + rotation.y * 57.3) * Math.PI) / 180
+      const xOffset = Math.sin(radLng) * radius
+      ctx.beginPath()
+      ctx.ellipse(cx, cy, Math.abs(xOffset), radius, 0, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+
+    // Plot 3D Property Markers on Spherical Earth Surface
+    validProps.forEach(p => {
+      const lat = (parseFloat(p.lat) * Math.PI) / 180
+      const lng = (parseFloat(p.lng) * Math.PI) / 180 + rotation.y
+
+      // 3D Spherical Trigonometry Projection
+      const x3d = Math.cos(lat) * Math.sin(lng)
+      const y3d = Math.sin(lat)
+      const z3d = Math.cos(lat) * Math.cos(lng)
+
+      // Only draw markers on the front hemisphere facing user (z3d > 0)
+      if (z3d > 0) {
+        const px = cx + x3d * radius
+        const py = cy - y3d * radius
+
+        // 3D Glowing Marker Pin
+        ctx.beginPath()
+        ctx.arc(px, py, 7 + z3d * 4, 0, Math.PI * 2)
+        ctx.fillStyle = '#E8532A'
+        ctx.fill()
+        ctx.strokeStyle = '#ffffff'
+        ctx.lineWidth = 2.5
+        ctx.stroke()
+
+        // Outer pulse aura
+        ctx.beginPath()
+        ctx.arc(px, py, 12 + z3d * 6, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(232, 83, 42, 0.6)'
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+      }
+    })
+  }, [rotation, validProps])
+
+  const onMouseDown = (e) => {
+    setIsDragging(true)
+    setDragStart({ x: e.clientX, y: e.clientY })
+  }
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return
+    const dx = e.clientX - dragStart.x
+    const dy = e.clientY - dragStart.y
+    setRotation(prev => ({
+      x: Math.max(-1.2, Math.min(1.2, prev.x + dy * 0.005)),
+      y: prev.y + dx * 0.008
+    }))
+    setDragStart({ x: e.clientX, y: e.clientY })
+  }
+
+  const onMouseUp = () => setIsDragging(false)
+
+  return (
+    <div className="fixed inset-0 z-[3000] bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 right-4 flex items-center gap-3">
+        <div className="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl text-white text-xs font-semibold border border-white/20 shadow-xl flex items-center gap-2">
+          <Globe size={14} className="text-sky-400 animate-spin" />
+          <span>Click & Drag to rotate 3D Earth Globe</span>
+        </div>
+        <button
+          onClick={onClose}
+          type="button"
+          className="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-xl transition-colors border border-white/20 shadow-lg"
+          title="Close Earth Globe View"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="relative w-full max-w-4xl h-[75vh] flex items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+          className="cursor-grab active:cursor-grabbing max-w-full max-h-full rounded-3xl"
+        />
+
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-xs font-bold px-5 py-2.5 rounded-full flex items-center gap-2 shadow-2xl">
+          <Globe size={15} className="text-sky-400" />
+          <span>Interactive 3D Earth Globe Shape ({validProps.length} properties mapped)</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Map Action Controller component for triggering drawing modes programmatically
-function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount, mapType, setMapType, is3D, setIs3D }) {
+function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount, mapType, setMapType, is3D, setIs3D, onOpenGlobe }) {
   const map = useMap()
 
   const handleLocateMe = () => {
@@ -247,6 +409,18 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount
         <span>{is3D ? '3D Active' : '3D View'}</span>
       </button>
 
+      {/* 3D Earth Globe Modal Trigger */}
+      <button
+        type="button"
+        onClick={onOpenGlobe}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-lg hover:shadow-sky-200 transition-all hover:scale-105"
+        title="Open 3D Interactive Earth Globe Shape Map"
+      >
+        <Globe size={14} className="animate-spin" />
+        <span>Earth 3D</span>
+      </button>
+
+
 
       <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
         <button
@@ -316,6 +490,7 @@ export default function MapSearch({ properties, onBoundsChange }) {
   const [polygon, setPolygon] = useState(null)
   const [mapType, setMapType] = useState('street')
   const [is3D, setIs3D] = useState(false)
+  const [showGlobe, setShowGlobe] = useState(false)
   const fgRef = useRef()
 
   const validProperties = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng))).filter(p => {
@@ -390,95 +565,101 @@ export default function MapSearch({ properties, onBoundsChange }) {
   }
 
   return (
-    <div className={`w-full h-[calc(100vh-140px)] min-h-[500px] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0 ${is3D ? 'map-container-3d' : 'map-container-2d'}`}>
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={defaultZoom} 
-        scrollWheelZoom={true} 
-        zoomControl={false}
-        className="w-full h-full"
-      >
-        <MapResize />
-        <ZoomControl position="bottomright" />
-        <TileLayer
-          key={mapType}
-          attribution={
-            mapType === 'satellite'
-              ? 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-              : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }
-          url={
-            mapType === 'satellite'
-              ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-              : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-          }
-          maxZoom={19}
-        />
+    <>
+      {showGlobe && <EarthGlobeModal properties={properties} onClose={() => setShowGlobe(false)} />}
 
-        <FeatureGroup ref={fgRef}>
-          <EditControl
-            position="topright"
-            onCreated={onCreated}
-            onEdited={onEdited}
-            onDeleted={onDeleted}
-            draw={{
-              polyline: false,
-              marker: false,
-              circlemarker: false,
-              polygon: {
-                allowIntersection: false,
-                drawError: { color: '#e1e100', message: "<strong>Error:</strong> shape edges cannot cross!" },
-                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
-              },
-              rectangle: {
-                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
-              },
-              circle: {
-                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
-              },
-            }}
+      <div className={`w-full h-[calc(100vh-140px)] min-h-[500px] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0 ${is3D ? 'map-container-3d' : 'map-container-2d'}`}>
+        <MapContainer 
+          center={defaultCenter} 
+          zoom={defaultZoom} 
+          scrollWheelZoom={true} 
+          zoomControl={false}
+          className="w-full h-full"
+        >
+          <MapResize />
+          <ZoomControl position="bottomright" />
+          <TileLayer
+            key={mapType}
+            attribution={
+              mapType === 'satellite'
+                ? 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }
+            url={
+              mapType === 'satellite'
+                ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+                : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+            }
+            maxZoom={19}
           />
-        </FeatureGroup>
 
-        <MapControls 
-          fgRef={fgRef} 
-          onTriggerDraw={handlePolygonChange} 
-          polygon={polygon} 
-          onClearFilter={handleClearFilter}
-          resultCount={validProperties.length}
-          mapType={mapType}
-          setMapType={setMapType}
-          is3D={is3D}
-          setIs3D={setIs3D}
-        />
-        
-        {validProperties.map(property => (
-          <Marker key={property._id} position={[property.lat, property.lng]}>
-            <Popup className="property-popup p-0">
-              <div className="w-48 overflow-hidden rounded-lg !m-0">
-                <div className="h-28 bg-gray-100 relative">
-                  <img src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400'} alt={property.title} className="w-full h-full object-cover" />
-                  <span className="absolute top-2 left-2 bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{property.status}</span>
-                </div>
-                <div className="p-3 space-y-1">
-                  <p className="font-bold text-gray-900 text-sm truncate !m-0">{property.title}</p>
-                  <p className="font-bold text-primary-500 text-sm !m-0">{formatPrice(property.price)}</p>
-                  <div className="text-[11px] text-gray-500 flex items-center gap-1 truncate !m-0">
-                    <MapPin size={11} className="shrink-0 text-primary-500" />
-                    <span className="truncate">{property.city || property.location}</span>
+          <FeatureGroup ref={fgRef}>
+            <EditControl
+              position="topright"
+              onCreated={onCreated}
+              onEdited={onEdited}
+              onDeleted={onDeleted}
+              draw={{
+                polyline: false,
+                marker: false,
+                circlemarker: false,
+                polygon: {
+                  allowIntersection: false,
+                  drawError: { color: '#e1e100', message: "<strong>Error:</strong> shape edges cannot cross!" },
+                  shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+                },
+                rectangle: {
+                  shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+                },
+                circle: {
+                  shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+                },
+              }}
+            />
+          </FeatureGroup>
+
+          <MapControls 
+            fgRef={fgRef} 
+            onTriggerDraw={handlePolygonChange} 
+            polygon={polygon} 
+            onClearFilter={handleClearFilter}
+            resultCount={validProperties.length}
+            mapType={mapType}
+            setMapType={setMapType}
+            is3D={is3D}
+            setIs3D={setIs3D}
+            onOpenGlobe={() => setShowGlobe(true)}
+          />
+          
+          {validProperties.map(property => (
+            <Marker key={property._id} position={[property.lat, property.lng]}>
+              <Popup className="property-popup p-0">
+                <div className="w-48 overflow-hidden rounded-lg !m-0">
+                  <div className="h-28 bg-gray-100 relative">
+                    <img src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400'} alt={property.title} className="w-full h-full object-cover" />
+                    <span className="absolute top-2 left-2 bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{property.status}</span>
                   </div>
-                  <Link to={`/properties/${property._id}`} className="block text-center bg-gray-900 text-white text-xs font-semibold py-2 rounded-md hover:bg-primary-500 transition-colors mt-2">
-                    View Details
-                  </Link>
+                  <div className="p-3 space-y-1">
+                    <p className="font-bold text-gray-900 text-sm truncate !m-0">{property.title}</p>
+                    <p className="font-bold text-primary-500 text-sm !m-0">{formatPrice(property.price)}</p>
+                    <div className="text-[11px] text-gray-500 flex items-center gap-1 truncate !m-0">
+                      <MapPin size={11} className="shrink-0 text-primary-500" />
+                      <span className="truncate">{property.city || property.location}</span>
+                    </div>
+                    <Link to={`/properties/${property._id}`} className="block text-center bg-gray-900 text-white text-xs font-semibold py-2 rounded-md hover:bg-primary-500 transition-colors mt-2">
+                      View Details
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          ))}
 
-        <MapBounds properties={validProperties} />
-      </MapContainer>
-    </div>
+          <MapBounds properties={validProperties} />
+        </MapContainer>
+      </div>
+    </>
   )
 }
+
 
