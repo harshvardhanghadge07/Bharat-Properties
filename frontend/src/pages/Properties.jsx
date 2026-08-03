@@ -125,17 +125,17 @@ export default function Properties() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         {/* Sidebar */}
         <AnimatePresence>
           {sidebarOpen && (
             <motion.aside
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 280, opacity: 1 }}
+              animate={{ width: typeof window !== 'undefined' && window.innerWidth < 1024 ? '100%' : 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              className="shrink-0 overflow-hidden"
+              className="shrink-0 overflow-hidden lg:w-[280px] w-full"
             >
-              <div className="bg-white rounded-xl border border-gray-100 p-5 w-[280px] space-y-6 sticky top-32">
+              <div className="bg-white rounded-xl border border-gray-100 p-5 w-full lg:w-[280px] space-y-6 lg:sticky lg:top-32">
                 {/* State */}
                 <FilterGroup title="State">
                   <select value={filters.state} onChange={(e) => setFilters({ state: e.target.value, city: '' })}
@@ -251,8 +251,9 @@ export default function Properties() {
           ) : (
             <>
               {/* Top Banner Ad */}
-              <div className="mb-6">
-                <AdBanner dataAdSlot="3333333333" className="h-24 md:h-32" />
+              <div className="mb-6 bg-gray-50 rounded-2xl min-h-[96px] flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-200">
+                <span className="absolute z-0">Advertisement Space</span>
+                <AdBanner dataAdSlot="3333333333" className="relative z-10 w-full" />
               </div>
 
               <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
@@ -264,8 +265,9 @@ export default function Properties() {
                     
                     {/* Insert Ad every 6 properties */}
                     {(i + 1) % 6 === 0 && i !== data.properties.length - 1 && (
-                      <div className={`col-span-1 ${viewMode === 'grid' ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
-                        <AdBanner dataAdSlot={`inline-ad-${i}`} className="h-40 my-4" />
+                      <div className={`col-span-1 ${viewMode === 'grid' ? 'sm:col-span-2 lg:col-span-3' : ''} bg-gray-50 rounded-2xl min-h-[120px] flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-200 my-4`}>
+                        <span className="absolute z-0">Advertisement Space</span>
+                        <AdBanner dataAdSlot={`inline-ad-${i}`} className="relative z-10 w-full" />
                       </div>
                     )}
                   </React.Fragment>
