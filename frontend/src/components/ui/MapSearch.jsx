@@ -4,7 +4,7 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPrice } from '../../utils/helpers'
-import { Disc, Pentagon, RotateCcw, MapPin, Locate, Search, X, Loader2, Layers, Globe } from 'lucide-react'
+import { Disc, Pentagon, RotateCcw, MapPin, Locate, Search, X, Loader2, Layers, Globe, Box } from 'lucide-react'
 import L from 'leaflet'
 
 // Ensure L is globally available for leaflet-draw
@@ -167,7 +167,7 @@ function MapSearchBar() {
 }
 
 // Map Action Controller component for triggering drawing modes programmatically
-function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount, mapType, setMapType }) {
+function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount, mapType, setMapType, is3D, setIs3D }) {
   const map = useMap()
 
   const handleLocateMe = () => {
@@ -231,6 +231,22 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount
           <span>Satellite</span>
         </button>
       </div>
+
+      {/* 3D Perspective View Toggle */}
+      <button
+        type="button"
+        onClick={() => setIs3D(!is3D)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-lg ${
+          is3D 
+            ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-primary-500 text-white ring-2 ring-purple-300' 
+            : 'bg-white/95 backdrop-blur-md text-gray-700 hover:bg-gray-100 border border-gray-200'
+        }`}
+        title="Toggle 3D Perspective Map View"
+      >
+        <Box size={14} className={is3D ? 'animate-bounce' : ''} />
+        <span>{is3D ? '3D Active' : '3D View'}</span>
+      </button>
+
 
       <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
         <button
@@ -299,8 +315,9 @@ export default function MapSearch({ properties, onBoundsChange }) {
   
   const [polygon, setPolygon] = useState(null)
   const [mapType, setMapType] = useState('street')
+  const [is3D, setIs3D] = useState(false)
   const fgRef = useRef()
-  
+
   const validProperties = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng))).filter(p => {
     if (!polygon) return true
     const pLat = parseFloat(p.lat)
@@ -373,7 +390,7 @@ export default function MapSearch({ properties, onBoundsChange }) {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-140px)] min-h-[500px] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0">
+    <div className={`w-full h-[calc(100vh-140px)] min-h-[500px] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0 ${is3D ? 'map-container-3d' : 'map-container-2d'}`}>
       <MapContainer 
         center={defaultCenter} 
         zoom={defaultZoom} 
@@ -431,6 +448,8 @@ export default function MapSearch({ properties, onBoundsChange }) {
           resultCount={validProperties.length}
           mapType={mapType}
           setMapType={setMapType}
+          is3D={is3D}
+          setIs3D={setIs3D}
         />
         
         {validProperties.map(property => (
