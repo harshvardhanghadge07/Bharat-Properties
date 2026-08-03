@@ -62,7 +62,7 @@ export default function HeroSection() {
 
       {/* Animated grid lines */}
       <div className="absolute inset-0 z-10 opacity-10"
-        style={{ backgroundImage: 'linear-gradient(rgba(232,83,42,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(232,83,42,0.4) 1px, transparent 1px)', backgroundSize: '60px 60px' }}
+        style={{ backgroundImage: 'linear-gradient(rgba(201,169,110,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,110,0.15) 1px, transparent 1px)', backgroundSize: '60px 60px' }}
       />
 
       {/* Content */}
@@ -76,7 +76,7 @@ export default function HeroSection() {
         <h1 ref={headRef} className="text-4xl sm:text-6xl md:text-7xl font-serif font-bold text-white leading-tight mb-4">
           Find Your Dream
           <span className="block text-transparent bg-clip-text"
-            style={{ backgroundImage: 'linear-gradient(135deg, #E8532A, #C9A96E)' }}>
+            style={{ backgroundImage: 'linear-gradient(135deg, #d5bd89, #C9A96E)' }}>
             Property in India
           </span>
         </h1>
