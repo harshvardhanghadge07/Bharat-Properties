@@ -4,7 +4,7 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPrice } from '../../utils/helpers'
-import { Disc, Pentagon, RotateCcw, MapPin, Locate } from 'lucide-react'
+import { Disc, Pentagon, RotateCcw, MapPin, Locate, Search, X, Loader2 } from 'lucide-react'
 import L from 'leaflet'
 
 // Ensure L is globally available for leaflet-draw
@@ -38,10 +38,10 @@ function MapBounds({ properties }) {
   const map = useMap()
   
   useEffect(() => {
-    const validProps = properties.filter(p => p.lat && p.lng)
+    const validProps = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng)))
     if (validProps.length === 0) return
     
-    const bounds = L.latLngBounds(validProps.map(p => [p.lat, p.lng]))
+    const bounds = L.latLngBounds(validProps.map(p => [parseFloat(p.lat), parseFloat(p.lng)]))
     map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
   }, [properties, map])
   
@@ -58,6 +58,112 @@ function isPointInPolygon(point, vs) {
     if (intersect) inside = !inside
   }
   return inside
+}
+
+// Interactive Map Search bar for city/locality geocoding
+function MapSearchBar() {
+  const map = useMap()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [results, setResults] = useState([])
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const wrapRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSearch = async (queryText) => {
+    if (!queryText.trim()) return
+    setIsSearching(true)
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}&countrycodes=in&limit=5`)
+      const data = await res.json()
+      setResults(data)
+      setDropdownOpen(true)
+    } catch (err) {
+      console.error('Geocoding error:', err)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  const handleSelectLocation = (loc) => {
+    const lat = parseFloat(loc.lat)
+    const lon = parseFloat(loc.lon)
+    if (!isNaN(lat) && !isNaN(lon)) {
+      map.flyTo([lat, lon], 13, { animate: true, duration: 1.5 })
+      setSearchQuery(loc.display_name.split(',')[0])
+      setDropdownOpen(false)
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSearch(searchQuery)
+    }
+  }
+
+  return (
+    <div ref={wrapRef} className="relative z-[1001]">
+      <div className="flex items-center bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 w-52 sm:w-72">
+        <Search size={14} className="text-gray-400 shrink-0 mr-2" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value)
+            if (e.target.value.length > 2) {
+              handleSearch(e.target.value)
+            }
+          }}
+          onFocus={() => {
+            if (results.length > 0) setDropdownOpen(true)
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder="Search city, area, or pincode..."
+          className="w-full bg-transparent focus:outline-none text-xs text-gray-800 placeholder-gray-400"
+        />
+        {isSearching && <Loader2 size={13} className="animate-spin text-primary-500 shrink-0 ml-1.5" />}
+        {searchQuery && !isSearching && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery('')
+              setResults([])
+              setDropdownOpen(false)
+            }}
+            className="text-gray-400 hover:text-gray-600 shrink-0 ml-1.5"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
+
+      {dropdownOpen && results.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-xl z-[1002] max-h-56 overflow-y-auto">
+          {results.map((item, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handleSelectLocation(item)}
+              className="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 text-gray-700 hover:text-primary-600 flex items-start gap-2 border-b border-gray-100 last:border-0 transition-colors"
+            >
+              <MapPin size={13} className="text-primary-500 shrink-0 mt-0.5" />
+              <span className="line-clamp-2">{item.display_name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // Map Action Controller component for triggering drawing modes programmatically
@@ -98,6 +204,8 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount
 
   return (
     <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 map-control-overlay">
+      <MapSearchBar />
+
       <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
         <button
           onClick={triggerCircleTool}
@@ -156,6 +264,7 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount
     </div>
   )
 }
+
 
 export default function MapSearch({ properties, onBoundsChange }) {
   // Default to center of India if no valid properties
