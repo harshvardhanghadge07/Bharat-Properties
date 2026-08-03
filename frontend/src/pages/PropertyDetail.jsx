@@ -65,9 +65,14 @@ export default function PropertyDetail() {
 
   const images = property.images?.length ? property.images : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800']
 
-  // WhatsApp inquiry — prefilled with property details, opens a chat with 919359854302
+  // Try to get the owner's phone number, fallback to platform admin
+  let ownerPhone = property.owner?.phone ? property.owner.phone.replace(/\D/g, '') : ''
+  if (ownerPhone && ownerPhone.length === 10) ownerPhone = '91' + ownerPhone // Add country code if missing
+
   const envPhone = (import.meta.env.VITE_WHATSAPP_NUMBER || '').replace(/\D/g, '')
-  const whatsappNumber = envPhone && envPhone !== '918484900257' ? envPhone : '919359854302'
+  const fallbackNumber = envPhone && envPhone !== '918484900257' ? envPhone : '919359854302'
+  const whatsappNumber = ownerPhone || fallbackNumber
+
   const whatsappMessage = encodeURIComponent(
     `Hi, I'm interested in "${property.title}" (${property.location}, ${property.city}) listed at ${formatPrice(property.price)}. Is it still available?`
   )

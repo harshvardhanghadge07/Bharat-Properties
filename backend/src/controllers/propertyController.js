@@ -92,7 +92,7 @@ export const getProperties = async (req, res, next) => {
     const total = await Property.countDocuments(filter)
     const properties = await Property.find(filter)
       .sort(sortObj).skip(skip).limit(parseInt(limit))
-      .populate('owner', 'name emailVerified phoneVerified')
+      .populate('owner', 'name phone emailVerified phoneVerified')
       .lean()
     await attachOwnerPlans(properties)
 
@@ -114,7 +114,7 @@ export const getProperty = async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid property ID' })
     }
     const property = await Property.findById(req.params.id)
-      .populate('owner', 'name emailVerified phoneVerified createdAt')
+      .populate('owner', 'name phone emailVerified phoneVerified createdAt')
     if (!property) return res.status(404).json({ error: 'Property not found' })
 
     // Track views for the seller's stats, but don't count the owner's own
@@ -142,7 +142,7 @@ export const getFeaturedProperties = async (req, res, next) => {
   try {
     const properties = await Property.find({ featured: true, status: 'ACTIVE' })
       .sort({ createdAt: -1 }).limit(6)
-      .populate('owner', 'name emailVerified phoneVerified')
+      .populate('owner', 'name phone emailVerified phoneVerified')
       .lean()
     await attachOwnerPlans(properties)
     res.json(properties)
