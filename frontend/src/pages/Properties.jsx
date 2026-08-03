@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { SlidersHorizontal, Grid3x3, List, X, ChevronDown } from 'lucide-react'
+import { SlidersHorizontal, Grid3x3, List, X, ChevronDown, Map } from 'lucide-react'
 import { propertyApi } from '../services/api'
 import PropertyCard3D from '../components/3d/PropertyCard3D'
 import PropertyListItem from '../components/ui/PropertyListItem'
@@ -10,6 +10,7 @@ import Skeleton from '../components/ui/Skeleton'
 import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState, ALL_CITIES } from '../utils/indiaData'
 import CityAutocomplete from '../components/ui/CityAutocomplete'
+import MapSearch from '../components/ui/MapSearch'
 import useSEO from '../hooks/useSEO'
 
 const PRICE_RANGES = [
@@ -110,6 +111,9 @@ export default function Properties() {
               </button>
               <button onClick={() => setViewMode('list')} className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`}>
                 <List size={15} />
+              </button>
+              <button onClick={() => setViewMode('map')} className={`p-2 ${viewMode === 'map' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`}>
+                <Map size={15} />
               </button>
             </div>
           </div>
@@ -226,6 +230,8 @@ export default function Properties() {
               <p className="text-sm">Try adjusting your filters</p>
               <button onClick={clearAll} className="mt-4 btn-primary">Clear Filters</button>
             </div>
+          ) : viewMode === 'map' ? (
+            <MapSearch properties={data.properties} />
           ) : (
             <>
               <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
