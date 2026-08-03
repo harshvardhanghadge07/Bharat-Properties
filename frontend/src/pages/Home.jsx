@@ -6,15 +6,26 @@ import Testimonials from '../components/sections/Testimonials'
 import WhyUs from '../components/sections/WhyUs'
 import BrowseByType from '../components/sections/BrowseByType'
 import CTABanner from '../components/sections/CTABanner'
+import AdBanner from '../components/ui/AdBanner'
 
 export default function Home() {
   return (
     <main>
       <HeroSection />
       <StatsSection />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdBanner dataAdSlot="1111111111" />
+      </div>
+
       <BrowseByType />
       <FeaturedProperties />
       <CitiesSection />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdBanner dataAdSlot="2222222222" />
+      </div>
+
       <WhyUs />
       <Testimonials />
       <CTABanner />

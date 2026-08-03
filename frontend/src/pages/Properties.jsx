@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,6 +11,7 @@ import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState, ALL_CITIES } from '../utils/indiaData'
 import CityAutocomplete from '../components/ui/CityAutocomplete'
 import MapSearch from '../components/ui/MapSearch'
+import AdBanner from '../components/ui/AdBanner'
 import useSEO from '../hooks/useSEO'
 
 const PRICE_RANGES = [
@@ -234,11 +235,25 @@ export default function Properties() {
             <MapSearch properties={data.properties} />
           ) : (
             <>
+              {/* Top Banner Ad */}
+              <div className="mb-6">
+                <AdBanner dataAdSlot="3333333333" className="h-24 md:h-32" />
+              </div>
+
               <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                 {data.properties.map((p, i) => (
-                  <motion.div key={p._id || p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                    {viewMode === 'grid' ? <PropertyCard3D property={p} /> : <PropertyListItem property={p} />}
-                  </motion.div>
+                  <React.Fragment key={p._id || p.id}>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (i % 6) * 0.05 }}>
+                      {viewMode === 'grid' ? <PropertyCard3D property={p} /> : <PropertyListItem property={p} />}
+                    </motion.div>
+                    
+                    {/* Insert Ad every 6 properties */}
+                    {(i + 1) % 6 === 0 && i !== data.properties.length - 1 && (
+                      <div className={`col-span-1 ${viewMode === 'grid' ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
+                        <AdBanner dataAdSlot={`inline-ad-${i}`} className="h-40 my-4" />
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
 
