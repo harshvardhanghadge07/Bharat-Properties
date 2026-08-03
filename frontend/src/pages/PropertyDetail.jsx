@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { MapPin, BedDouble, Bath, Maximize2, Phone, Mail, Share2, Heart, ChevronLeft, ChevronRight, CheckCircle2, MessageCircle } from 'lucide-react'
 import { propertyApi, inquiryApi } from '../services/api'
 import { formatPrice, formatArea, TYPE_COLORS, STATUS_COLORS, TYPE_LABELS } from '../utils/helpers'
@@ -20,6 +20,9 @@ export default function PropertyDetail() {
   const [imgIdx, setImgIdx]     = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm]         = useState({ name: '', email: '', phone: '', message: 'I am interested in this property. Please contact me.' })
+
+  const { scrollY } = useScroll()
+  const imgY = useTransform(scrollY, [0, 500], ['0%', '15%'])
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', id],
@@ -105,7 +108,7 @@ export default function PropertyDetail() {
             {/* Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
               <div className="relative h-80 md:h-[450px] bg-gray-100">
-                <img src={images[imgIdx]} alt={property.title} className="w-full h-full object-cover" />
+                <motion.img style={{ y: imgY, scale: 1.15 }} src={images[imgIdx]} alt={property.title} className="w-full h-full object-cover origin-top" />
                 {/* Controls */}
                 {images.length > 1 && (
                   <>

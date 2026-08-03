@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { gsap } from 'gsap'
 import { Search, MapPin } from 'lucide-react'
 import { Suspense, lazy } from 'react'
@@ -18,6 +18,11 @@ export default function HeroSection() {
   const [suggestions, setSug] = useState([])
   const headRef               = useRef()
   const navigate              = useNavigate()
+
+  const { scrollY } = useScroll()
+  const bgY = useTransform(scrollY, [0, 1000], ['0%', '30%'])
+  const contentY = useTransform(scrollY, [0, 1000], ['0%', '15%'])
+  const contentOpacity = useTransform(scrollY, [0, 500], [1, 0])
 
   useEffect(() => {
     gsap.fromTo(headRef.current,
@@ -48,12 +53,12 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0d0d14]">
-      {/* 3D Background */}
-      <div className="absolute inset-0 z-0 hero-canvas">
+      {/* 3D Background with Parallax */}
+      <motion.div className="absolute inset-0 z-0 hero-canvas" style={{ y: bgY }}>
         <Suspense fallback={null}>
           <FloatingCity />
         </Suspense>
-      </div>
+      </motion.div>
 
       {/* Gradient overlay */}
       <div className="absolute inset-0 z-10"
@@ -65,8 +70,8 @@ export default function HeroSection() {
         style={{ backgroundImage: 'linear-gradient(rgba(232,83,42,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(232,83,42,0.4) 1px, transparent 1px)', backgroundSize: '60px 60px' }}
       />
 
-      {/* Content */}
-      <div className="relative z-20 text-center px-4 max-w-4xl mx-auto w-full">
+      {/* Content with Parallax */}
+      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-20 text-center px-4 max-w-4xl mx-auto w-full">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           className="inline-flex items-center gap-2 bg-primary-500/20 border border-primary-500/40 text-primary-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
           <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse" />
@@ -157,7 +162,7 @@ export default function HeroSection() {
             </div>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}
