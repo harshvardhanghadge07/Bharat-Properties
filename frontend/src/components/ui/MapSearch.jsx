@@ -4,7 +4,13 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPrice } from '../../utils/helpers'
+import { Disc, Pentagon, RotateCcw, MapPin, Locate } from 'lucide-react'
 import L from 'leaflet'
+
+// Ensure L is globally available for leaflet-draw
+if (typeof window !== 'undefined') {
+  window.L = L
+}
 
 // Fix Leaflet's default icon issue with webpack/vite
 delete L.Icon.Default.prototype._getIconUrl
@@ -13,6 +19,19 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
 })
+
+// Auto-invalidate map size to prevent gray layout tile gaps
+function MapResize() {
+  const map = useMap()
+  useEffect(() => {
+    map.invalidateSize()
+    const timer = setTimeout(() => {
+      map.invalidateSize()
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [map])
+  return null
+}
 
 // Auto-zoom to fit bounds of properties
 function MapBounds({ properties }) {
@@ -41,6 +60,101 @@ function isPointInPolygon(point, vs) {
   return inside
 }
 
+// Map Action Controller component for triggering drawing modes programmatically
+function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter }) {
+  const map = useMap()
+
+  const handleLocateMe = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude, longitude } = pos.coords
+        map.flyTo([latitude, longitude], 13, { animate: true })
+      }, () => {
+        alert('Could not get your current location.')
+      })
+    }
+  }
+
+  const triggerCircleTool = () => {
+    const circleButton = document.querySelector('.leaflet-draw-draw-circle')
+    if (circleButton) {
+      circleButton.click()
+    } else {
+      // Fallback: create circle around map center if draw button isn't clicked
+      const center = map.getCenter()
+      fgRef.current?.clearLayers()
+      const circle = L.circle(center, { radius: 5000, color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.2 })
+      fgRef.current?.addLayer(circle)
+      onTriggerDraw({ type: 'circle', latlng: [center.lat, center.lng], radius: 5000 }, circle.getBounds())
+    }
+  }
+
+  const triggerPolygonTool = () => {
+    const polyButton = document.querySelector('.leaflet-draw-draw-polygon')
+    if (polyButton) {
+      polyButton.click()
+    }
+  }
+
+  return (
+    <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 map-control-overlay">
+      <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
+        <button
+          onClick={triggerCircleTool}
+          type="button"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-500 hover:text-white transition-all duration-200 shadow-sm"
+          title="Click to draw a circle search area on map"
+        >
+          <Disc size={15} />
+          <span>Draw Circle</span>
+        </button>
+
+        <button
+          onClick={triggerPolygonTool}
+          type="button"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 transition-all duration-200"
+          title="Click to draw a custom polygon area on map"
+        >
+          <Pentagon size={15} />
+          <span>Draw Area</span>
+        </button>
+
+        <button
+          onClick={handleLocateMe}
+          type="button"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all duration-200"
+          title="Center on my location"
+        >
+          <Locate size={15} />
+        </button>
+
+        {polygon && (
+          <button
+            onClick={onClearFilter}
+            type="button"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200"
+            title="Clear active map filter"
+          >
+            <RotateCcw size={14} />
+            <span>Clear Filter</span>
+          </button>
+        )}
+      </div>
+
+      {polygon && (
+        <div className="bg-primary-600 text-white px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-1.5 animate-pulse">
+          <Disc size={13} />
+          {polygon.type === 'circle' ? (
+            <span>Circle Area: <strong>{(polygon.radius / 1000).toFixed(1)} km</strong> radius</span>
+          ) : (
+            <span>Custom Map Filter Active</span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function MapSearch({ properties, onBoundsChange }) {
   // Default to center of India if no valid properties
   const defaultCenter = [20.5937, 78.9629]
@@ -63,25 +177,8 @@ export default function MapSearch({ properties, onBoundsChange }) {
     return true
   })
 
-  const onCreated = (e) => {
-    const { layerType, layer } = e
-    
-    // Clear previous drawings
-    fgRef.current.clearLayers()
-    fgRef.current.addLayer(layer)
-    
-    let bounds
-    if (layerType === 'circle') {
-      const latlng = layer.getLatLng()
-      const radius = layer.getRadius()
-      setPolygon({ type: 'circle', latlng: [latlng.lat, latlng.lng], radius })
-      bounds = layer.getBounds()
-    } else {
-      const latlngs = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng])
-      setPolygon({ type: layerType, latlngs })
-      bounds = layer.getBounds()
-    }
-
+  const handlePolygonChange = (polyData, bounds) => {
+    setPolygon(polyData)
     if (onBoundsChange && bounds) {
       onBoundsChange({
         minLat: bounds.getSouth(),
@@ -92,19 +189,58 @@ export default function MapSearch({ properties, onBoundsChange }) {
     }
   }
 
+  const onCreated = (e) => {
+    const { layerType, layer } = e
+    
+    // Clear previous drawings
+    fgRef.current?.clearLayers()
+    fgRef.current?.addLayer(layer)
+    
+    let bounds
+    if (layerType === 'circle') {
+      const latlng = layer.getLatLng()
+      const radius = layer.getRadius()
+      handlePolygonChange({ type: 'circle', latlng: [latlng.lat, latlng.lng], radius }, layer.getBounds())
+    } else {
+      const latlngs = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng])
+      handlePolygonChange({ type: layerType, latlngs }, layer.getBounds())
+    }
+  }
+
+  const onEdited = (e) => {
+    const layers = e.layers
+    layers.eachLayer((layer) => {
+      if (layer instanceof L.Circle) {
+        const latlng = layer.getLatLng()
+        const radius = layer.getRadius()
+        handlePolygonChange({ type: 'circle', latlng: [latlng.lat, latlng.lng], radius }, layer.getBounds())
+      } else if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+        const latlngs = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng])
+        handlePolygonChange({ type: 'polygon', latlngs }, layer.getBounds())
+      }
+    })
+  }
+
   const onDeleted = () => {
     setPolygon(null)
     if (onBoundsChange) onBoundsChange(null)
   }
 
+  const handleClearFilter = () => {
+    fgRef.current?.clearLayers()
+    setPolygon(null)
+    if (onBoundsChange) onBoundsChange(null)
+  }
+
   return (
-    <div className="w-full h-[calc(100vh-140px)] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0">
+    <div className="w-full h-[calc(100vh-140px)] min-h-[500px] rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0">
       <MapContainer 
         center={defaultCenter} 
         zoom={defaultZoom} 
         scrollWheelZoom={true} 
         className="w-full h-full"
       >
+        <MapResize />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -114,17 +250,33 @@ export default function MapSearch({ properties, onBoundsChange }) {
           <EditControl
             position="topright"
             onCreated={onCreated}
+            onEdited={onEdited}
             onDeleted={onDeleted}
             draw={{
               polyline: false,
               marker: false,
               circlemarker: false,
-              polygon: true,
-              rectangle: true,
-              circle: true,
+              polygon: {
+                allowIntersection: false,
+                drawError: { color: '#e1e100', message: "<strong>Error:</strong> shape edges cannot cross!" },
+                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+              },
+              rectangle: {
+                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+              },
+              circle: {
+                shapeOptions: { color: '#E8532A', fillColor: '#E8532A', fillOpacity: 0.25 }
+              },
             }}
           />
         </FeatureGroup>
+
+        <MapControls 
+          fgRef={fgRef} 
+          onTriggerDraw={handlePolygonChange} 
+          polygon={polygon} 
+          onClearFilter={handleClearFilter} 
+        />
         
         {validProperties.map(property => (
           <Marker key={property._id} position={[property.lat, property.lng]}>
@@ -137,6 +289,10 @@ export default function MapSearch({ properties, onBoundsChange }) {
                 <div className="p-3 space-y-1">
                   <p className="font-bold text-gray-900 text-sm truncate !m-0">{property.title}</p>
                   <p className="font-bold text-primary-500 text-sm !m-0">{formatPrice(property.price)}</p>
+                  <div className="text-[11px] text-gray-500 flex items-center gap-1 truncate !m-0">
+                    <MapPin size={11} className="shrink-0 text-primary-500" />
+                    <span className="truncate">{property.city || property.location}</span>
+                  </div>
                   <Link to={`/properties/${property._id}`} className="block text-center bg-gray-900 text-white text-xs font-semibold py-2 rounded-md hover:bg-primary-500 transition-colors mt-2">
                     View Details
                   </Link>
@@ -151,3 +307,4 @@ export default function MapSearch({ properties, onBoundsChange }) {
     </div>
   )
 }
+

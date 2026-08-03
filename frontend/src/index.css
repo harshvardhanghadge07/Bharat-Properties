@@ -49,3 +49,56 @@
 
 /* 3D canvas background */
 .hero-canvas canvas { display: block; }
+
+/* Leaflet Draw Control Styles & Fixes */
+.leaflet-draw-section {
+  position: relative;
+  z-index: 10;
+}
+.leaflet-draw-toolbar {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+.leaflet-draw-toolbar a {
+  background-image: url('https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/images/spritesheet.png') !important;
+  background-repeat: no-repeat !important;
+  background-color: #ffffff !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+.leaflet-draw-toolbar a:hover {
+  background-color: #f8fafc !important;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .leaflet-draw-toolbar a {
+    background-image: url('https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/images/spritesheet-2x.png') !important;
+    background-size: 300px 30px !important;
+  }
+}
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon { background-position: -2px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle { background-position: -62px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-draw-circle { background-position: -92px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-draw-marker { background-position: -122px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-draw-circlemarker { background-position: -272px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-edit-edit { background-position: -152px -2px !important; }
+.leaflet-draw-toolbar .leaflet-draw-edit-remove { background-position: -212px -2px !important; }
+
+/* Custom Map Overlay Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.map-control-overlay {
+  animation: fadeInDown 0.2s ease-out forwards;
+}
+
