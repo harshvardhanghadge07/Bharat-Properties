@@ -88,13 +88,13 @@ export default function HeroSection() {
 
         {/* Search Box */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
-          className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-visible sm:overflow-hidden">
           {/* Tabs */}
-          <div className="flex border-b border-gray-100">
+          <div className="flex border-b border-white/20">
             {TABS.map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
-                  tab === t ? 'text-primary-500 border-b-2 border-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700'
+                  tab === t ? 'text-white border-b-2 border-primary-500 bg-white/10' : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}>
                 {t}
               </button>
@@ -104,23 +104,24 @@ export default function HeroSection() {
           {/* Search inputs */}
           <div className="flex flex-col sm:flex-row">
             {/* City */}
-            <div className="relative flex-1 border-b sm:border-b-0 sm:border-r border-gray-100">
+            <div className="relative flex-1 border-b sm:border-b-0 sm:border-r border-white/20">
               <CityAutocomplete
                 value={city}
                 onChange={setCity}
                 placeholder="All Cities"
+                className="!text-white placeholder-gray-300"
               />
             </div>
 
             {/* Keyword */}
             <div className="relative flex-[2]">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
               <input
                 value={query}
                 onChange={(e) => onQueryChange(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search by locality, project, keyword..."
-                className="w-full pl-10 pr-4 py-4 text-sm text-gray-700 focus:outline-none"
+                className="w-full pl-10 pr-4 py-4 text-sm text-white placeholder-gray-300 focus:outline-none bg-transparent"
               />
               {/* Autocomplete */}
               {suggestions.length > 0 && (
