@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPrice } from '../../utils/helpers'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 // Fix Leaflet's default icon issue with webpack/vite
 delete L.Icon.Default.prototype._getIconUrl
