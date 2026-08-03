@@ -49,6 +49,7 @@ export default function Properties() {
     maxLat:   params.get('maxLat') || '',
     minLng:   params.get('minLng') || '',
     maxLng:   params.get('maxLng') || '',
+    limit:    viewMode === 'map' ? 100 : 12,
   }
 
   const { data, isLoading } = useQuery({
@@ -56,6 +57,7 @@ export default function Properties() {
     queryFn: () => propertyApi.getAll(filters),
     keepPreviousData: true,
   })
+
 
   const setFilter = (key, val) => setFilters({ [key]: val })
 
@@ -228,15 +230,8 @@ export default function Properties() {
             <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {Array(9).fill(0).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}
             </div>
-          ) : !data?.properties?.length ? (
-            <div className="text-center py-20 text-gray-400">
-              <div className="text-6xl mb-4">🏠</div>
-              <p className="text-lg font-medium">No properties found</p>
-              <p className="text-sm">Try adjusting your filters</p>
-              <button onClick={clearAll} className="mt-4 btn-primary">Clear Filters</button>
-            </div>
           ) : viewMode === 'map' ? (
-            <MapSearch properties={data.properties} onBoundsChange={(bounds) => {
+            <MapSearch properties={data?.properties || []} onBoundsChange={(bounds) => {
               if (bounds) {
                 setFilters({
                   minLat: bounds.minLat.toString(),
@@ -248,7 +243,15 @@ export default function Properties() {
                 setFilters({ minLat: '', maxLat: '', minLng: '', maxLng: '' })
               }
             }} />
+          ) : !data?.properties?.length ? (
+            <div className="text-center py-20 text-gray-400">
+              <div className="text-6xl mb-4">🏠</div>
+              <p className="text-lg font-medium">No properties found</p>
+              <p className="text-sm">Try adjusting your filters</p>
+              <button onClick={clearAll} className="mt-4 btn-primary">Clear Filters</button>
+            </div>
           ) : (
+
             <>
               {/* Top Banner Ad */}
               <div className="mb-6 bg-gray-50 rounded-2xl min-h-[96px] flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-200">

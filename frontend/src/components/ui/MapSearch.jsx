@@ -61,7 +61,7 @@ function isPointInPolygon(point, vs) {
 }
 
 // Map Action Controller component for triggering drawing modes programmatically
-function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter }) {
+function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter, resultCount }) {
   const map = useMap()
 
   const handleLocateMe = () => {
@@ -142,12 +142,14 @@ function MapControls({ fgRef, onTriggerDraw, polygon, onClearFilter }) {
       </div>
 
       {polygon && (
-        <div className="bg-primary-600 text-white px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-1.5 animate-pulse">
+        <div className={`px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-1.5 ${resultCount > 0 ? 'bg-primary-600 text-white' : 'bg-amber-600 text-white animate-bounce'}`}>
           <Disc size={13} />
           {polygon.type === 'circle' ? (
-            <span>Circle Area: <strong>{(polygon.radius / 1000).toFixed(1)} km</strong> radius</span>
+            <span>
+              Circle: <strong>{(polygon.radius / 1000).toFixed(1)} km</strong> radius ({resultCount} {resultCount === 1 ? 'property' : 'properties'})
+            </span>
           ) : (
-            <span>Custom Map Filter Active</span>
+            <span>Custom Area ({resultCount} {resultCount === 1 ? 'property' : 'properties'})</span>
           )}
         </div>
       )}
@@ -163,19 +165,22 @@ export default function MapSearch({ properties, onBoundsChange }) {
   const [polygon, setPolygon] = useState(null)
   const fgRef = useRef()
   
-  const validProperties = properties.filter(p => p.lat && p.lng).filter(p => {
+  const validProperties = properties.filter(p => p && p.lat != null && p.lng != null && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng))).filter(p => {
     if (!polygon) return true
+    const pLat = parseFloat(p.lat)
+    const pLng = parseFloat(p.lng)
     if (polygon.type === 'circle') {
       const center = L.latLng(polygon.latlng)
-      return center.distanceTo(L.latLng(p.lat, p.lng)) <= polygon.radius
+      return center.distanceTo(L.latLng(pLat, pLng)) <= polygon.radius
     } else if (polygon.type === 'polygon') {
-      return isPointInPolygon([p.lat, p.lng], polygon.latlngs)
+      return isPointInPolygon([pLat, pLng], polygon.latlngs)
     } else if (polygon.type === 'rectangle') {
       const bounds = L.latLngBounds(polygon.latlngs)
-      return bounds.contains(L.latLng(p.lat, p.lng))
+      return bounds.contains(L.latLng(pLat, pLng))
     }
     return true
   })
+
 
   const handlePolygonChange = (polyData, bounds) => {
     setPolygon(polyData)
@@ -275,7 +280,8 @@ export default function MapSearch({ properties, onBoundsChange }) {
           fgRef={fgRef} 
           onTriggerDraw={handlePolygonChange} 
           polygon={polygon} 
-          onClearFilter={handleClearFilter} 
+          onClearFilter={handleClearFilter}
+          resultCount={validProperties.length}
         />
         
         {validProperties.map(property => (
