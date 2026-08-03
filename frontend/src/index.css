@@ -17,7 +17,7 @@
     @apply bg-primary-500 text-white px-6 py-3 rounded-md font-semibold hover:bg-primary-600 transition-all duration-200 inline-flex items-center gap-2;
   }
   .btn-outline {
-    @apply border border-accent-500 text-accent-600 px-6 py-3 rounded-md font-semibold hover:bg-accent-50 transition-all duration-200 inline-flex items-center gap-2;
+    @apply border border-primary-500 text-primary-500 px-6 py-3 rounded-md font-semibold hover:bg-primary-50 transition-all duration-200 inline-flex items-center gap-2;
   }
   .card {
     @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden;
@@ -39,7 +39,7 @@
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #C9A96E; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #E8532A; border-radius: 4px; }
 
 /* 3D canvas background */
 .hero-canvas canvas { display: block; }

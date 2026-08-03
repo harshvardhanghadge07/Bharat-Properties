@@ -5,21 +5,14 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  '#f8fafc',
-          100: '#f1f5f9',
-          400: '#334155',
-          500: '#0f172a',
-          600: '#020617',
-          700: '#000000',
+          50:  '#fff7ed',
+          100: '#ffedd5',
+          500: '#E8532A',
+          600: '#d44420',
+          700: '#b83519',
         },
-        accent: {
-          50:  '#fdfcf7',
-          100: '#f9f6ea',
-          400: '#d5bd89',
-          500: '#C9A96E', // Champagne Gold
-          600: '#b59863',
-        },
-        dark: '#020617',
+        gold: '#C9A96E',
+        dark: '#1a1a1a',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
