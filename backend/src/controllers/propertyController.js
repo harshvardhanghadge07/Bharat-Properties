@@ -65,6 +65,7 @@ export const getProperties = async (req, res, next) => {
     const {
       search, city, state, type, status, minPrice, maxPrice,
       featured, bedrooms, page = 1, limit = 12, sort = 'createdAt',
+      minLat, maxLat, minLng, maxLng,
     } = req.query
 
     const filter = {}
@@ -81,6 +82,14 @@ export const getProperties = async (req, res, next) => {
       filter.price = {}
       if (minPrice) filter.price.$gte = parseFloat(minPrice)
       if (maxPrice) filter.price.$lte = parseFloat(maxPrice)
+    }
+
+    // Spatial bounding box filter (from Map Draw)
+    if (minLat && maxLat) {
+      filter.lat = { $gte: parseFloat(minLat), $lte: parseFloat(maxLat) }
+    }
+    if (minLng && maxLng) {
+      filter.lng = { $gte: parseFloat(minLng), $lte: parseFloat(maxLng) }
     }
 
     const sortObj =

@@ -45,6 +45,10 @@ export default function Properties() {
     featured: params.get('featured') || '',
     page:     parseInt(params.get('page') || '1'),
     sort:     params.get('sort') || 'createdAt',
+    minLat:   params.get('minLat') || '',
+    maxLat:   params.get('maxLat') || '',
+    minLng:   params.get('minLng') || '',
+    maxLng:   params.get('maxLng') || '',
   }
 
   const { data, isLoading } = useQuery({
@@ -232,7 +236,18 @@ export default function Properties() {
               <button onClick={clearAll} className="mt-4 btn-primary">Clear Filters</button>
             </div>
           ) : viewMode === 'map' ? (
-            <MapSearch properties={data.properties} />
+            <MapSearch properties={data.properties} onBoundsChange={(bounds) => {
+              if (bounds) {
+                setFilters({
+                  minLat: bounds.minLat.toString(),
+                  maxLat: bounds.maxLat.toString(),
+                  minLng: bounds.minLng.toString(),
+                  maxLng: bounds.maxLng.toString()
+                })
+              } else {
+                setFilters({ minLat: '', maxLat: '', minLng: '', maxLng: '' })
+              }
+            }} />
           ) : (
             <>
               {/* Top Banner Ad */}
