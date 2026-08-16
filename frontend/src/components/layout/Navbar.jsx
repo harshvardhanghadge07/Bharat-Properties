@@ -138,6 +138,25 @@ export default function Navbar() {
             className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
           >
             <div className="px-4 py-4 space-y-1">
+              {isAuthenticated && (
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 p-3 mb-3 bg-primary-50/60 hover:bg-primary-50 rounded-xl border border-primary-100 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-xs">
+                    {getInitials(user?.name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user?.name || 'User Profile'}</p>
+                    <p className="text-xs text-gray-500 truncate">{user?.email || 'View account details'}</p>
+                  </div>
+                  <span className="text-xs text-primary-600 font-semibold bg-white px-2.5 py-1 rounded-md shadow-2xs border border-primary-100 shrink-0">
+                    My Profile
+                  </span>
+                </Link>
+              )}
+
               {navLinks.map((l) => (
                 <Link key={l.label} to={l.href} onClick={() => setMobileOpen(false)}
                   className="block px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
@@ -147,18 +166,39 @@ export default function Navbar() {
               <hr className="my-2" />
               {isAuthenticated ? (
                 <>
-                  <Link to="/post-property" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2">Post Property</Link>
-                  <Link to="/my-listings" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">My Listings</Link>
-                  <Link to="/favorites" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">My Favorites</Link>
+                  <Link to="/post-property" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2 mb-3">
+                    <Building2 size={16} /> Post Property
+                  </Link>
+                  <Link to="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    <User size={18} className="text-primary-500" /> My Profile
+                  </Link>
+                  <Link to="/my-listings" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    <Building2 size={18} className="text-gray-500" /> My Listings
+                  </Link>
+                  <Link to="/favorites" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    <Heart size={18} className="text-gray-500" /> My Favorites
+                  </Link>
+                  <Link to="/terms" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    <Shield size={18} className="text-gray-500" /> Legal & Policies
+                  </Link>
                   {user?.role === 'ADMIN' && (
-                    <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50">Admin</Link>
+                    <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                      <LayoutDashboard size={18} className="text-gray-500" /> Admin Dashboard
+                    </Link>
                   )}
-                  <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-red-500 font-medium">Logout</button>
+                  <hr className="my-2" />
+                  <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-500 font-medium hover:bg-red-50 rounded-lg text-left">
+                    <LogOut size={18} /> Logout
+                  </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 text-gray-700">Login</Link>
-                  <Link to="/pricing" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2">Post Property</Link>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+                    <User size={18} className="text-gray-500" /> Login
+                  </Link>
+                  <Link to="/pricing" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2">
+                    <Building2 size={16} /> Post Property
+                  </Link>
                 </>
               )}
             </div>
