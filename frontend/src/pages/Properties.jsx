@@ -73,11 +73,11 @@ export default function Properties() {
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 sticky top-16 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:border-primary-500 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:border-primary-500 transition-colors w-full sm:w-auto justify-center sm:justify-start"
             >
               <SlidersHorizontal size={15} />
               Filters
@@ -86,30 +86,32 @@ export default function Properties() {
               )}
             </button>
             {activeCount > 0 && (
-              <button onClick={clearAll} className="text-xs text-gray-500 hover:text-primary-500 flex items-center gap-1">
+              <button onClick={clearAll} className="text-xs text-gray-500 hover:text-primary-500 flex items-center gap-1 shrink-0">
                 <X size={12} /> Clear all
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            {!isLoading && <span>{data?.pagination?.total || 0} properties</span>}
-            <select
-              value={filters.sort}
-              onChange={(e) => setFilter('sort', e.target.value)}
-              className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary-500"
-            >
-              <option value="createdAt">Newest First</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-            <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-              <button onClick={() => setViewMode('grid')} className={`p-2 ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`} title="Grid View">
-                <Grid3x3 size={15} />
-              </button>
-              <button onClick={() => setViewMode('list')} className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`} title="List View">
-                <List size={15} />
-              </button>
+          <div className="flex items-center justify-between sm:justify-end gap-2 text-sm text-gray-500 w-full sm:w-auto">
+            {!isLoading && <span className="hidden sm:inline-block whitespace-nowrap">{data?.pagination?.total || 0} properties</span>}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={filters.sort}
+                onChange={(e) => setFilter('sort', e.target.value)}
+                className="flex-1 sm:flex-none border border-gray-200 rounded-lg px-3 py-2 sm:py-1.5 text-sm focus:outline-none focus:border-primary-500"
+              >
+                <option value="createdAt">Newest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+              <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                <button onClick={() => setViewMode('grid')} className={`p-2.5 sm:p-2 ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`} title="Grid View">
+                  <Grid3x3 size={16} className="sm:w-[15px] sm:h-[15px]" />
+                </button>
+                <button onClick={() => setViewMode('list')} className={`p-2.5 sm:p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'hover:bg-gray-50'}`} title="List View">
+                  <List size={16} className="sm:w-[15px] sm:h-[15px]" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -119,12 +121,13 @@ export default function Properties() {
         <AnimatePresence>
           {sidebarOpen && (
             <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: typeof window !== 'undefined' && window.innerWidth < 1024 ? '100%' : 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              className="shrink-0 overflow-hidden lg:w-[280px] w-full"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="shrink-0 lg:w-[280px] w-full"
             >
-              <div className="bg-white rounded-xl border border-gray-100 p-5 w-full lg:w-[280px] space-y-6 lg:sticky lg:top-32">
+              <div className="bg-white rounded-xl border border-gray-100 p-5 w-full lg:w-[280px] space-y-6 lg:sticky lg:top-32 mb-6 lg:mb-0">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-gray-900">Filters</h3>
                   <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600 lg:hidden">
