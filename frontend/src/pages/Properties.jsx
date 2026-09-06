@@ -10,7 +10,6 @@ import Skeleton from '../components/ui/Skeleton'
 import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState, ALL_CITIES } from '../utils/indiaData'
 import CityAutocomplete from '../components/ui/CityAutocomplete'
-import AdBanner from '../components/ui/AdBanner'
 import useSEO from '../hooks/useSEO'
 
 const PRICE_RANGES = [
@@ -238,11 +237,6 @@ export default function Properties() {
             </div>
           ) : (
             <>
-              <div className="mb-6 bg-gray-50 rounded-2xl min-h-[96px] flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-200">
-                <span className="absolute z-0">Advertisement Space</span>
-                <AdBanner dataAdSlot="3333333333" className="relative z-10 w-full" />
-              </div>
-
               <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                 {data.properties.map((p, i) => (
                   <React.Fragment key={p._id || p.id}>
@@ -250,12 +244,6 @@ export default function Properties() {
                       {viewMode === 'grid' ? <PropertyCard3D property={p} /> : <PropertyListItem property={p} />}
                     </motion.div>
                     
-                    {(i + 1) % 6 === 0 && i !== data.properties.length - 1 && (
-                      <div className={`col-span-1 ${viewMode === 'grid' ? 'sm:col-span-2 lg:col-span-3' : ''} bg-gray-50 rounded-2xl min-h-[120px] flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-200 my-4`}>
-                        <span className="absolute z-0">Advertisement Space</span>
-                        <AdBanner dataAdSlot={`inline-ad-${i}`} className="relative z-10 w-full" />
-                      </div>
-                    )}
                   </React.Fragment>
                 ))}
               </div>

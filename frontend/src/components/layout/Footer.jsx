@@ -7,7 +7,6 @@ import {
   Facebook,
   Twitter,
   Instagram,
-  Youtube,
   FileText,
   Shield,
   RotateCcw,
@@ -130,8 +129,12 @@ export default function Footer() {
           </ul>
 
           <div className="flex gap-2">
-            {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
-              <a key={i} href="#" className="w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-500 transition-colors">
+            {[
+              { Icon: Facebook, url: 'https://www.facebook.com/profile.php?id=61593932496583&mibextid=wwXIfr' },
+              { Icon: Twitter, url: 'https://x.com/bharatonchain_?s=11' },
+              { Icon: Instagram, url: 'https://www.instagram.com/bharat_onchain_' }
+            ].map(({ Icon, url }, i) => (
+              <a key={i} href={url} target={url !== '#' ? "_blank" : undefined} rel={url !== '#' ? "noopener noreferrer" : undefined} className="w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-500 transition-colors">
                 <Icon size={13} />
               </a>
             ))}
