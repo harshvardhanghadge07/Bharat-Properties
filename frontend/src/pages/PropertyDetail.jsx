@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { MapPin, BedDouble, Bath, Maximize2, Phone, Mail, Share2, Heart, ChevronLeft, ChevronRight, CheckCircle2, MessageCircle } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Maximize2, Phone, Mail, Share2, Heart, ChevronLeft, ChevronRight, CheckCircle2, MessageCircle, X } from 'lucide-react'
 import { propertyApi, inquiryApi } from '../services/api'
 import { formatPrice, formatArea, TYPE_COLORS, STATUS_COLORS, TYPE_LABELS } from '../utils/helpers'
 import Skeleton from '../components/ui/Skeleton'
@@ -18,6 +18,7 @@ export default function PropertyDetail() {
   const navigate = useNavigate()
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const [imgIdx, setImgIdx]     = useState(0)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm]         = useState({ name: '', email: '', phone: '', message: 'I am interested in this property. Please contact me.' })
 
@@ -108,7 +109,13 @@ export default function PropertyDetail() {
             {/* Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
               <div className="relative h-80 md:h-[450px] bg-gray-100">
-                <motion.img style={{ y: imgY, scale: 1.15 }} src={images[imgIdx]} alt={property.title} className="w-full h-full object-cover origin-top" />
+                <motion.img 
+                  style={{ y: imgY, scale: 1.15 }} 
+                  src={images[imgIdx]} 
+                  alt={property.title} 
+                  className="w-full h-full object-cover origin-top cursor-pointer" 
+                  onClick={() => setIsViewerOpen(true)}
+                />
                 {/* Controls */}
                 {images.length > 1 && (
                   <>
@@ -308,6 +315,50 @@ export default function PropertyDetail() {
 
         <SimilarProperties property={property} />
       </div>
+
+      {/* Full-screen Image Viewer */}
+      {isViewerOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsViewerOpen(false)
+          }}
+        >
+          <button 
+            onClick={() => setIsViewerOpen(false)}
+            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
+          >
+            <X size={32} />
+          </button>
+          
+          <div className="relative w-full max-w-6xl px-4 flex items-center justify-center h-full" onClick={(e) => {
+            if (e.target === e.currentTarget) setIsViewerOpen(false)
+          }}>
+            <img 
+              src={images[imgIdx]} 
+              alt={property.title} 
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+            
+            {images.length > 1 && (
+              <>
+                <button 
+                  onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
+                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  onClick={() => setImgIdx((i) => (i + 1) % images.length)}
+                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
