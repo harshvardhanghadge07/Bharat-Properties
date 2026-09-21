@@ -8,7 +8,6 @@ import { getInitials } from '../../utils/helpers'
 const navLinks = [
   { label: 'Buy',   href: '/properties?status=ACTIVE' },
   { label: 'Rent',  href: '/properties?status=RENTED' },
-  { label: 'Pricing', href: '/pricing' },
   { label: 'Support', href: '/support' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
@@ -116,7 +115,7 @@ export default function Navbar() {
             ) : (
               <>
                 <Link to="/login" className={`text-sm font-medium hover:text-primary-500 transition-colors ${txt}`}>Login</Link>
-                <Link to="/pricing" className="btn-primary text-sm py-2 px-4">Post Property</Link>
+                <Link to="/post-property" className="btn-primary text-sm py-2 px-4">Post Property</Link>
               </>
             )}
           </div>
@@ -196,7 +195,7 @@ export default function Navbar() {
                   <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
                     <User size={18} className="text-gray-500" /> Login
                   </Link>
-                  <Link to="/pricing" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2">
+                  <Link to="/post-property" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center mt-2">
                     <Building2 size={16} /> Post Property
                   </Link>
                 </>

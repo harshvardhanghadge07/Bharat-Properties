@@ -228,7 +228,7 @@ export const forgotPassword = async (req, res, next) => {
 }
 
 // Admin: search users by name/email/phone — used e.g. to look up a seller
-// before manually granting them a subscription plan.
+// for account support.
 export const searchUsers = async (req, res, next) => {
   try {
     const q = (req.query.q || '').trim()

@@ -4,7 +4,6 @@ import {
   Building2,
   MessageSquare,
   BarChart3,
-  CreditCard,
   Plus,
 } from 'lucide-react'
 
@@ -17,7 +16,6 @@ export default function AdminNav() {
     { label: 'Listings', href: '/admin/listings', icon: Building2 },
     { label: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
     { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
   ]
 
   return (

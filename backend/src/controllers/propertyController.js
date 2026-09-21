@@ -1,41 +1,7 @@
 import mongoose from 'mongoose'
 import Property from '../models/Property.js'
-import Subscription from '../models/Subscription.js'
 import Inquiry from '../models/Inquiry.js'
-import { PLANS } from '../config/plans.js'
-
-// Get the photo limit for a user's current plan (admins get the highest tier's limit)
-const getPhotoLimit = async (user) => {
-  if (user.role === 'ADMIN') return PLANS.UNLIMITED.photoLimit
-  const sub = await Subscription.findOne({ user: user._id })
-  const plan = PLANS[sub?.plan] || PLANS.FREE
-  return plan.photoLimit
-}
-
-// A stored sub.plan can lag reality until the owner's next listing action
-// re-triggers checkListingLimit's downgrade check — so for *display* purposes
-// (the Pro Seller badge) we treat an expired paid plan as FREE immediately,
-// without writing that downgrade to the DB here.
-const getEffectivePlan = (sub) => {
-  if (!sub) return 'FREE'
-  if (sub.plan !== 'FREE' && sub.expiryDate && new Date() > sub.expiryDate) return 'FREE'
-  return sub.plan
-}
-
-// Batch-attaches each property's owner's current plan (for the Pro Seller
-// badge) in a single query, rather than one Subscription lookup per property.
-const attachOwnerPlans = async (properties) => {
-  const ownerIds = [...new Set(properties.map((p) => p.owner?._id?.toString()).filter(Boolean))]
-  if (!ownerIds.length) return properties
-
-  const subs = await Subscription.find({ user: { $in: ownerIds } }).select('user plan expiryDate').lean()
-  const planByUser = Object.fromEntries(subs.map((s) => [String(s.user), getEffectivePlan(s)]))
-
-  for (const p of properties) {
-    if (p.owner) p.owner.plan = planByUser[String(p.owner._id)] || 'FREE'
-  }
-  return properties
-}
+const PHOTO_LIMIT = 5
 
 // Fields any listing owner may set from their own post/edit form
 const OWNER_EDITABLE_FIELDS = [
@@ -103,7 +69,6 @@ export const getProperties = async (req, res, next) => {
       .sort(sortObj).skip(skip).limit(parseInt(limit))
       .populate('owner', 'name phone emailVerified phoneVerified')
       .lean()
-    await attachOwnerPlans(properties)
 
     res.json({
       properties,
@@ -134,16 +99,7 @@ export const getProperty = async (req, res, next) => {
       await property.save()
     }
 
-    // Attach the owner's current plan for the Pro Seller badge. Kept as a
-    // plain-object mutation after the save above, rather than lean(), since
-    // the view-count increment needs a real mongoose doc to call .save() on.
-    const propertyObj = property.toObject()
-    if (propertyObj.owner) {
-      const sub = await Subscription.findOne({ user: propertyObj.owner._id }).select('plan expiryDate').lean()
-      propertyObj.owner.plan = getEffectivePlan(sub)
-    }
-
-    res.json(propertyObj)
+    res.json(property.toObject())
   } catch (err) { next(err) }
 }
 
@@ -153,7 +109,6 @@ export const getFeaturedProperties = async (req, res, next) => {
       .sort({ createdAt: -1 }).limit(6)
       .populate('owner', 'name phone emailVerified phoneVerified')
       .lean()
-    await attachOwnerPlans(properties)
     res.json(properties)
   } catch (err) { next(err) }
 }
@@ -194,23 +149,15 @@ export const getMyProperties = async (req, res, next) => {
 
 export const createProperty = async (req, res, next) => {
   try {
-    const photoLimit = await getPhotoLimit(req.user)
+    const photoLimit = PHOTO_LIMIT
     if (Array.isArray(req.body.images) && req.body.images.length > photoLimit) {
       return res.status(400).json({
-        error: `Your current plan allows up to ${photoLimit} photos per listing. Please remove some photos or upgrade your plan.`,
+        error: `You can upload up to ${photoLimit} photos per listing. Please remove some photos.`,
         photoLimit,
       })
     }
 
     const property = await Property.create({ ...pickEditableFields(req.body, req.user), owner: req.user._id })
-
-    // Increment listing usage count (skip for admin / unlimited plan)
-    if (req.user.role !== 'ADMIN') {
-      await Subscription.findOneAndUpdate(
-        { user: req.user._id },
-        { $inc: { listingsUsed: 1 } }
-      )
-    }
 
     res.status(201).json(property)
   } catch (err) { next(err) }
@@ -230,10 +177,10 @@ export const updateProperty = async (req, res, next) => {
     }
 
     if (Array.isArray(req.body.images)) {
-      const photoLimit = await getPhotoLimit(req.user)
+      const photoLimit = PHOTO_LIMIT
       if (req.body.images.length > photoLimit) {
         return res.status(400).json({
-          error: `Your current plan allows up to ${photoLimit} photos per listing. Please remove some photos or upgrade your plan.`,
+          error: `You can upload up to ${photoLimit} photos per listing. Please remove some photos.`,
           photoLimit,
         })
       }
@@ -258,14 +205,6 @@ export const deleteProperty = async (req, res, next) => {
     }
 
     await property.deleteOne()
-
-    // Decrement listing usage count
-    if (req.user.role !== 'ADMIN' && property.owner) {
-      await Subscription.findOneAndUpdate(
-        { user: property.owner },
-        { $inc: { listingsUsed: -1 } }
-      )
-    }
 
     res.json({ message: 'Property deleted successfully' })
   } catch (err) { next(err) }

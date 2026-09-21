@@ -8,8 +8,8 @@ import { ALL_STATES, getCitiesByState } from '../../utils/indiaData'
 import Skeleton from '../../components/ui/Skeleton'
 import AdminNav from '../../components/ui/AdminNav'
 
-// Admins bypass the plan-based photo limit (matches PLANS.UNLIMITED.photoLimit on the backend)
-const ADMIN_PHOTO_LIMIT = 15
+// All listings use the same photo limit.
+const ADMIN_PHOTO_LIMIT = 5
 
 const EMPTY = {
   title:'', description:'', price:'', type:'APARTMENT', status:'ACTIVE',

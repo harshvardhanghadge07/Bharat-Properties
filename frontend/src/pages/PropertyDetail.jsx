@@ -11,7 +11,6 @@ import SimilarProperties from '../components/ui/SimilarProperties'
 import useSEO from '../hooks/useSEO'
 import { useAuthStore } from '../store/useAuthStore'
 import VerifiedBadge from '../components/ui/VerifiedBadge'
-import ProSellerBadge from '../components/ui/ProSellerBadge'
 
 export default function PropertyDetail() {
   const { id } = useParams()
@@ -261,7 +260,6 @@ export default function PropertyDetail() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-semibold text-gray-900">{property.owner.name}</p>
                   {(property.owner.emailVerified || property.owner.phoneVerified) && <VerifiedBadge size="md" />}
-                  {property.owner.plan === 'UNLIMITED' && <ProSellerBadge size="md" />}
                 </div>
               </div>
             )}

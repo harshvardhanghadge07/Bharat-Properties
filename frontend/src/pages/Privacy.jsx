@@ -9,11 +9,11 @@ const SECTIONS = [
   },
   {
     title: '2. How We Use Your Information',
-    body: `We use your information to: create and manage your account; display your listings to potential buyers/renters; process subscription payments via Razorpay; send transactional emails (inquiry notifications, password resets, subscription receipts); and respond to support requests. We do not sell your personal information to third parties.`,
+    body: `We use your information to: create and manage your account; display your listings to potential buyers/renters; send transactional emails (inquiry notifications, password resets); and respond to support requests. We do not sell your personal information to third parties.`,
   },
   {
     title: '3. Sharing of Information',
-    body: `When you submit an inquiry on a property, your name, email, and phone number are shared with that property's listing owner so they can contact you. Payment information is processed directly by Razorpay under their own privacy and security policies — we do not store your card or UPI details on our servers. We may share information if required by law or to protect the safety and rights of our users.`,
+    body: `When you submit an inquiry on a property, your name, email, and phone number are shared with that property's listing owner so they can contact you. We may share information if required by law or to protect the safety and rights of our users.`,
   },
   {
     title: '4. Data Storage & Security',
@@ -48,7 +48,7 @@ export default function Privacy() {
       <div className="max-w-3xl mx-auto px-6 py-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-400 mb-6">Last updated: July 2026</p>
+          <p className="text-sm text-gray-400 mb-6">Last updated: September 2026</p>
 
 
 

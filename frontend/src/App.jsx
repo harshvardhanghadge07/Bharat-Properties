@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/useAuthStore'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -17,7 +17,6 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
-import Pricing from './pages/Pricing'
 import PostProperty from './pages/PostProperty'
 import MyListings from './pages/MyListings'
 import Favorites from './pages/Favorites'
@@ -26,7 +25,6 @@ import AdminDashboard from './pages/Admin/Dashboard'
 import AdminListings from './pages/Admin/ManageListings'
 import AdminInquiries from './pages/Admin/Inquiries'
 import AdminAnalytics from './pages/Admin/Analytics'
-import AdminSubscriptions from './pages/Admin/Subscriptions'
 import ProtectedRoute from './components/ui/ProtectedRoute'
 import ScrollToTop from './components/ui/ScrollToTop'
 import CookieConsent from './components/ui/CookieConsent'
@@ -62,7 +60,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/pricing" element={<Navigate to="/post-property" replace />} />
         <Route path="/post-property" element={<PostProperty />} />
         <Route path="/edit-property/:id" element={<PostProperty />} />
         <Route path="/my-listings" element={<MyListings />} />
@@ -72,7 +70,7 @@ export default function App() {
         <Route path="/admin/listings" element={<ProtectedRoute adminOnly><AdminListings /></ProtectedRoute>} />
         <Route path="/admin/inquiries" element={<ProtectedRoute adminOnly><AdminInquiries /></ProtectedRoute>} />
         <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalytics /></ProtectedRoute>} />
-        <Route path="/admin/subscriptions" element={<ProtectedRoute adminOnly><AdminSubscriptions /></ProtectedRoute>} />
+        <Route path="/admin/subscriptions" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

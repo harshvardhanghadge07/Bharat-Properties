@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { CheckCircle2, AlertCircle, Crown, Upload, X, Loader2, ImagePlus } from 'lucide-react'
-import { propertyApi, subscriptionApi, uploadApi, authApi } from '../services/api'
+import { CheckCircle2, AlertCircle, X, Loader2, ImagePlus } from 'lucide-react'
+import { propertyApi, uploadApi } from '../services/api'
 import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../utils/indiaData'
 import { useAuthStore } from '../store/useAuthStore'
@@ -15,7 +14,6 @@ const EMPTY = {
 }
 
 export default function PostProperty() {
-  const navigate = useNavigate()
   const qc = useQueryClient()
   const { id } = useParams()
   const isEditMode = Boolean(id)
@@ -23,15 +21,8 @@ export default function PostProperty() {
   const [form, setForm] = useState(EMPTY)
   const [amenityInput, setAmenityInput] = useState('')
   const [success, setSuccess] = useState(false)
-  const [limitError, setLimitError] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
-
-  const { data: mySub } = useQuery({
-    queryKey: ['my-subscription'],
-    queryFn: subscriptionApi.getMine,
-    enabled: isAuthenticated,
-  })
 
   // In edit mode, load the existing property so the form can be pre-filled
   const { data: existingProperty, isLoading: loadingProperty } = useQuery({
@@ -58,16 +49,14 @@ export default function PostProperty() {
       amenities: existingProperty.amenities || [],
     })
   }, [existingProperty])
-const createMut = useMutation({
+  const createMut = useMutation({
     mutationFn: (data) => propertyApi.create(data),
     onSuccess: () => {
       qc.invalidateQueries(['my-properties'])
-      qc.invalidateQueries(['my-subscription'])
       setSuccess(true)
     },
     onError: (err) => {
-      if (err.upgradeRequired) setLimitError(err)
-      else alert(err.error || 'Failed to create listing')
+      alert(err.error || 'Failed to create listing')
     },
   })
   
@@ -126,22 +115,6 @@ const createMut = useMutation({
     )
   }
 
-  if (limitError) {
-    return (
-      <div className="pt-32 pb-20 text-center max-w-md mx-auto px-4">
-        <AlertCircle size={64} className="text-primary-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Listing Limit Reached</h2>
-        <p className="text-gray-500 mb-2">
-          You've used {limitError.used}/{limitError.limit} listings on the <b>{limitError.currentPlan}</b> plan.
-        </p>
-        <p className="text-gray-500 mb-6">Upgrade your plan to list more properties.</p>
-        <Link to="/pricing" className="btn-primary inline-flex items-center gap-2">
-          <Crown size={16} /> View Plans
-        </Link>
-      </div>
-    )
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault()
     const payload = {
@@ -167,7 +140,7 @@ const createMut = useMutation({
     if (!files.length) return
 
     if (form.images.length + files.length > photoLimit) {
-      setUploadError(`Your ${mySub?.plan || 'current'} plan allows up to ${photoLimit} photos per listing. Upgrade to add more.`)
+      setUploadError(`You can upload up to ${photoLimit} photos per listing.`)
       return
     }
 
@@ -193,7 +166,7 @@ const createMut = useMutation({
   })
 
   const cityOptions = form.state ? getCitiesByState(form.state) : []
-  const photoLimit = mySub?.photoLimit || 5 // default to FREE tier limit until subscription loads
+  const photoLimit = 5
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
@@ -205,20 +178,7 @@ const createMut = useMutation({
           </p>
         </div>
 
-        {/* Usage banner */}
-        {mySub && (
-          <div className="bg-white rounded-xl p-4 mb-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500">Plan: <span className="font-semibold text-gray-800">{mySub.plan}</span></p>
-              <p className="text-sm text-gray-700">
-                {mySub.listingsUsed} / {mySub.listingLimit === 999999 ? '∞' : mySub.listingLimit} listings used
-              </p>
-            </div>
-            {mySub.plan === 'FREE' && (
-              <Link to="/pricing" className="text-xs text-primary-500 font-semibold hover:underline">Upgrade →</Link>
-            )}
-          </div>
-        )}
+        <p className="text-sm text-green-700 mb-6">Listing your property is free. No payment or listing limit.</p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
           <div>
@@ -329,7 +289,7 @@ const createMut = useMutation({
                   <>
                     <ImagePlus size={22} className="text-gray-400" />
                     <span className="text-sm text-gray-600 font-medium">Click to upload photos</span>
-                    <span className="text-xs text-gray-400">JPG, PNG — up to 10MB each, max {photoLimit} photos on your {mySub?.plan || 'Free'} plan</span>
+                    <span className="text-xs text-gray-400">JPG, PNG — up to 10MB each, max {photoLimit} photos per listing</span>
                   </>
                 )}
                 <input

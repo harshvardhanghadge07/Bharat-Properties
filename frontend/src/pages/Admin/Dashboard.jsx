@@ -9,7 +9,6 @@ import {
   Eye,
   Mail,
   BarChart3,
-  CreditCard,
 } from 'lucide-react'
 import { propertyApi, inquiryApi } from '../../services/api'
 import Skeleton from '../../components/ui/Skeleton'
@@ -73,12 +72,6 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <Link
-              to="/admin/subscriptions"
-              className="btn-outline text-xs sm:text-sm py-2 px-3.5 rounded-xl inline-flex items-center gap-1.5"
-            >
-              <CreditCard size={15} /> Subscriptions
-            </Link>
             <Link
               to="/admin/analytics"
               className="btn-outline text-xs sm:text-sm py-2 px-3.5 rounded-xl inline-flex items-center gap-1.5"

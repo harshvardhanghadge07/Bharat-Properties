@@ -16,8 +16,8 @@ const SECTIONS = [
     body: `Property owners, agents, and brokers ("Sellers") are solely responsible for the accuracy of the information, photos, and pricing in their listings. Bharat Properties does not independently verify listing details, ownership, or the legal status of any property, and does not act as a real estate broker or agent in any transaction between users. We reserve the right to remove any listing that appears fraudulent, misleading, or in violation of these Terms.`,
   },
   {
-    title: '4. Subscription Plans & Payments',
-    body: `Bharat Properties offers Free, Premium, and Unlimited Pro subscription plans with different listing limits, photo limits, and visibility features, as described on our Pricing page. Payments are processed securely through Razorpay. Subscription fees are charged in advance for the selected billing period and, unless otherwise stated, are non-refundable except as described in our Refund Policy. Plans automatically expire at the end of the billing period and listings revert to the Free tier limits unless renewed.`,
+    title: '4. Free Property Listings',
+    body: `Posting properties on Bharat Properties is free. Verified users can create listings without a listing limit or payment. Each listing supports up to five photos. All listings remain subject to our content and moderation rules.`,
   },
   {
     title: '5. User Conduct',
@@ -52,7 +52,7 @@ export default function Terms() {
       <div className="max-w-3xl mx-auto px-6 py-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
-          <p className="text-sm text-gray-400 mb-6">Last updated: July 2026</p>
+          <p className="text-sm text-gray-400 mb-6">Last updated: September 2026</p>
 
 
 

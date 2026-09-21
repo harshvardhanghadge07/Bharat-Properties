@@ -20,7 +20,6 @@ const COMPANY = [
   { label: 'Help & Support', href: '/support' },
   { label: 'Contact Us', href: '/contact' },
   { label: 'All Properties', href: '/properties' },
-  { label: 'Pricing Plans', href: '/pricing' },
 ]
 
 const LEGAL_POLICIES = [

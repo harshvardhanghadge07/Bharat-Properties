@@ -23,7 +23,6 @@ import useSEO from '../hooks/useSEO'
 const HEALTH_METRICS = [
   { name: 'Property Search & API', status: 'Operational', latency: '24ms', ok: true },
   { name: 'Email & Verification Service', status: 'Operational', latency: '99.9%', ok: true },
-  { name: 'Razorpay Payment Gateway', status: 'Operational', latency: 'Online', ok: true },
   { name: 'Cloudinary Image CDN', status: 'Operational', latency: '12ms', ok: true },
   { name: 'Support Response Desk', status: 'Active (24/7)', latency: '< 15 mins', ok: true },
 ]
@@ -39,7 +38,7 @@ const CATEGORIES = [
     id: 'posting',
     icon: Sparkles,
     title: 'Posting & Seller Hub',
-    desc: 'Creating listings, managing subscriptions, feature upgrades & leads.',
+    desc: 'Creating free listings, managing properties, photos & leads.',
   },
   {
     id: 'account',
@@ -51,7 +50,7 @@ const CATEGORIES = [
     id: 'billing',
     icon: CreditCard,
     title: 'Billing & Refunds',
-    desc: 'Invoices, Razorpay payment methods, subscription plans & refund policy.',
+    desc: 'Free listings, previous payment questions & refund policy.',
   },
 ]
 
@@ -73,8 +72,8 @@ const FAQS = [
   },
   {
     cat: 'billing',
-    q: 'What payment methods are supported for subscription plans?',
-    a: 'We support all major Indian payment methods via Razorpay, including UPI (GPay, PhonePe, Paytm), Credit/Debit Cards, Net Banking, and Wallet payments.',
+    q: 'Is posting a property free?',
+    a: 'Yes. Verified users can post unlimited free listings with up to five photos per listing. No payment is required.',
   },
   {
     cat: 'posting',
@@ -359,7 +358,7 @@ export default function Support() {
                 <ExternalLink size={14} className="text-gray-400 group-hover:text-white" />
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Subscription refund criteria, Razorpay payment processing, and billing FAQs.
+                Free listing details, removing listings, and help with previous payments.
               </p>
             </Link>
           </div>

@@ -1,7 +1,6 @@
 import Property from '../models/Property.js'
 import User from '../models/User.js'
 import Inquiry from '../models/Inquiry.js'
-import Subscription from '../models/Subscription.js'
 
 // GET /api/analytics/overview — admin-only dashboard summary
 export const getOverview = async (req, res, next) => {
@@ -17,7 +16,6 @@ export const getOverview = async (req, res, next) => {
       propertiesByCity,
       propertiesByType,
       propertiesByState,
-      subscriptionsByPlan,
       recentInquiries,
       listingsPerMonth,
     ] = await Promise.all([
@@ -44,10 +42,6 @@ export const getOverview = async (req, res, next) => {
         { $group: { _id: '$state', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 8 },
-      ]),
-
-      Subscription.aggregate([
-        { $group: { _id: '$plan', count: { $sum: 1 } } },
       ]),
 
       Inquiry.find().sort({ createdAt: -1 }).limit(5).populate('property', 'title city'),
@@ -82,7 +76,6 @@ export const getOverview = async (req, res, next) => {
       byCity: propertiesByCity.map((c) => ({ city: c._id || 'Unknown', count: c.count })),
       byType: propertiesByType.map((t) => ({ type: t._id, count: t.count })),
       byState: propertiesByState.map((s) => ({ state: s._id || 'Unknown', count: s.count })),
-      byPlan: subscriptionsByPlan.map((p) => ({ plan: p._id, count: p.count })),
       recentInquiries,
       listingsPerMonth: listingsPerMonth.map((m) => ({
         label: `${m._id.month}/${m._id.year}`,

@@ -3,7 +3,6 @@ import { BedDouble, Bath, Maximize2, MapPin, Heart } from 'lucide-react'
 import { formatPrice, formatArea, TYPE_COLORS, TYPE_LABELS } from '../../utils/helpers'
 import { useAuthStore } from '../../store/useAuthStore'
 import VerifiedBadge from './VerifiedBadge'
-import ProSellerBadge from './ProSellerBadge'
 
 export default function PropertyListItem({ property }) {
   const navigate = useNavigate()
@@ -28,7 +27,6 @@ export default function PropertyListItem({ property }) {
           <div className="flex items-center gap-2 mb-1">
             <p className="text-2xl font-bold text-primary-500">{formatPrice(property.price)}</p>
             {(property.owner?.emailVerified || property.owner?.phoneVerified) && <VerifiedBadge />}
-            {property.owner?.plan === 'UNLIMITED' && <ProSellerBadge />}
           </div>
           <Link to={`/properties/${property.id}`}>
           

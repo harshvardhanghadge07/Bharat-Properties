@@ -3,8 +3,7 @@ import {
   getProperties, getProperty, getFeaturedProperties,
   getStats, getMyProperties, createProperty, updateProperty, deleteProperty,
 } from '../controllers/propertyController.js'
-import { authenticate, requireAdmin, attachUserIfPresent, requireVerifiedContact } from '../middleware/auth.js'
-import { checkListingLimit } from '../middleware/checkListingLimit.js'
+import { authenticate, attachUserIfPresent, requireVerifiedContact } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -14,9 +13,8 @@ router.get('/stats',     getStats)
 router.get('/mine',      authenticate, getMyProperties)
 router.get('/:id',       attachUserIfPresent, getProperty)
 
-// Any authenticated user can list, as long as their email/phone is verified —
-// limit enforced by subscription middleware
-router.post('/',         authenticate, requireVerifiedContact, checkListingLimit, createProperty)
+// Verified users can create unlimited free listings.
+router.post('/',         authenticate, requireVerifiedContact, createProperty)
 router.put('/:id',       authenticate, updateProperty)
 router.delete('/:id',    authenticate, deleteProperty)
 

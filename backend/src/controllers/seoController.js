@@ -21,7 +21,7 @@ const formatPriceServer = (price) => {
 export const getSitemap = async (req, res, next) => {
   try {
     const base = clientUrl()
-    const staticPaths = ['', '/properties', '/about', '/contact', '/pricing', '/privacy', '/terms', '/refund']
+    const staticPaths = ['', '/properties', '/about', '/contact', '/privacy', '/terms', '/refund']
     const properties = await Property.find({ status: 'ACTIVE' }).select('_id updatedAt').lean()
 
     const urls = [

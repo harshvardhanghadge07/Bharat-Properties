@@ -39,8 +39,8 @@ export const chatWithAI = async (req, res, next) => {
 
     // 2. Help / How to post / Email verification / Support topics
     if (query.includes('post') || query.includes('sell') || query.includes('list')) {
-      replyText = `🤖 **How to Post Your Property on Bharat Properties**:\n\n1️⃣ Click the **"Post Property"** button at the top header.\n2️⃣ Fill in your property details (Location, City, Price, Sqft, Amenities).\n3️⃣ Upload clear photos of your property.\n4️⃣ Click **Publish** to make it live for thousands of verified buyers!\n\nPro sellers get 5x more lead inquiries with featured badges!`
-      suggestions = ['View Pricing Plans', 'How to get verified?', 'Contact Support']
+      replyText = `🤖 **How to Post Your Property on Bharat Properties**:\n\n1️⃣ Click the **"Post Property"** button at the top header.\n2️⃣ Fill in your property details (Location, City, Price, Sqft, Amenities).\n3️⃣ Upload clear photos of your property.\n4️⃣ Click **Publish** to make it live for thousands of verified buyers!\n\nPosting properties is free, with no listing limit.`
+      suggestions = ['Post a Free Listing', 'How to get verified?', 'Contact Support']
       return res.json({ replyText, properties: [], suggestions })
     }
 

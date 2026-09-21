@@ -66,15 +66,6 @@ export const inquiryApi = {
   delete:  (id) => api.delete(`/inquiries/${id}`),
 }
 
-export const subscriptionApi = {
-  getPlans:    ()        => api.get('/subscriptions/plans'),
-  getMine:     ()        => api.get('/subscriptions/me'),
-  createOrder: (planId)  => api.post('/subscriptions/create-order', { planId }),
-  verify:      (data)    => api.post('/subscriptions/verify', data),
-  getAll:      ()        => api.get('/subscriptions/all'),
-  manualActivate: (d)     => api.post('/subscriptions/manual-activate', d), // { email, planId, note }
-  revertToFree:   (userId) => api.post(`/subscriptions/${userId}/revert-to-free`),
-}
 
 export const adminApi = {
   searchUsers: (q) => api.get('/auth/admin/search-users', { params: { q } }),

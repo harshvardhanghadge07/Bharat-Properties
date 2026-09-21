@@ -9,13 +9,11 @@ import propertiesRouter from './routes/properties.js'
 import authRouter from './routes/auth.js'
 import inquiriesRouter from './routes/inquiries.js'
 import uploadRouter from './routes/upload.js'
-import subscriptionsRouter from './routes/subscriptions.js'
 import analyticsRouter from './routes/analytics.js'
 import favoritesRouter from './routes/favorites.js'
 import aiRouter from './routes/ai.js'
 import prerenderRouter from './routes/prerender.js'
 import { getSitemap } from './controllers/seoController.js'
-import { handleRazorpayWebhook } from './controllers/subscriptionController.js'
 
 connectDB()
 
@@ -57,10 +55,6 @@ app.use(cors({
   credentials: true
 }))
 
-// Razorpay webhook MUST come before express.json() and receive the RAW body —
-// signature verification hashes the exact raw bytes Razorpay sent, not a re-serialized object.
-app.post('/api/subscriptions/webhook', express.raw({ type: 'application/json' }), handleRazorpayWebhook)
-
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }))
@@ -74,7 +68,6 @@ app.use('/api/properties', propertiesRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/inquiries', inquiriesRouter)
 app.use('/api/upload', uploadRouter)
-app.use('/api/subscriptions', subscriptionsRouter)
 app.use('/api/analytics', analyticsRouter)
 app.use('/api/favorites', favoritesRouter)
 app.use('/api/ai', aiRouter)

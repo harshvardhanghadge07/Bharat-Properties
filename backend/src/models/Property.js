@@ -25,7 +25,7 @@ const propertySchema = new mongoose.Schema({
   // (excludes the owner's own visits — see attachUserIfPresent + getProperty)
   views:       { type: Number, default: 0 },
 
-  // Owner tracking — for subscription/listing-limit enforcement
+  // Owner tracking for listing management
   owner:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
   // Listing approval (optional moderation workflow)

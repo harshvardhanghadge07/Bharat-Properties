@@ -4,32 +4,16 @@ import LegalNav from '../components/ui/LegalNav'
 
 const SECTIONS = [
   {
-    title: '1. Subscription Fees',
-    body: `Bharat Properties subscription plans (Premium, Unlimited Pro) are billed in advance for a 30-day period. By subscribing, you authorize us to charge the applicable fee via Razorpay at the time of purchase.`,
+    title: '1. Free Listings',
+    body: `Property listings are free. No payment is required to publish or maintain a listing.`,
   },
   {
-    title: '2. General Refund Policy',
-    body: `Subscription fees are generally non-refundable once a plan has been activated, since your listing limit, photo limit, and visibility benefits are made available to your account immediately upon successful payment.`,
+    title: '2. Removing a Listing',
+    body: `You can edit or delete your listings from My Listings at any time, without a cancellation fee.`,
   },
   {
-    title: '3. Exceptions — When a Refund May Be Considered',
-    body: `We will consider a full or partial refund in the following situations: (a) you were charged more than once for the same subscription period due to a technical error; (b) a payment was deducted from your account but the subscription was never activated due to a system failure on our end; (c) you cancel within 24 hours of purchase and have not used any of the plan's paid features (e.g. have not exceeded the Free tier's listing/photo limits). Refund requests outside these situations will be reviewed on a case-by-case basis.`,
-  },
-  {
-    title: '4. How to Request a Refund',
-    body: `To request a refund, email bharatestates3@gmail.com  within 7 days of the charge, including your registered email address and the payment ID from your Razorpay receipt. We aim to respond to all refund requests within 5 business days.`,
-  },
-  {
-    title: '5. Refund Processing Time',
-    body: `Approved refunds are processed back to your original payment method via Razorpay. Depending on your bank/UPI provider, this can take 5-10 business days to reflect in your account after approval.`,
-  },
-  {
-    title: '6. Plan Downgrades & Cancellations',
-    body: `You may choose not to renew your subscription at any time — simply let the current billing period expire. Your account will automatically move to the Free tier limits at the end of the period. Listings that exceed the Free tier's limits will remain saved but may not display publicly until you are back within your plan's limits or upgrade again.`,
-  },
-  {
-    title: '7. Contact Us',
-    body: `For any billing or refund questions, reach us at  bharatestates3@gmail.com  or +919359854302, or write to us at  Jalna - 431203, Maharashtra, India.`,
+    title: '3. Previous Payments',
+    body: `For questions or refund requests about a previous payment, contact bharatestates3@gmail.com with your registered email address and payment reference. Previous payments remain subject to the policy applicable at the time of purchase.`,
   },
 ]
 
@@ -40,7 +24,7 @@ export default function Refund() {
       <div className="max-w-3xl mx-auto px-6 py-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Refund & Cancellation Policy</h1>
-          <p className="text-sm text-gray-400 mb-6">Last updated: July 2026</p>
+          <p className="text-sm text-gray-400 mb-6">Last updated: September 2026</p>
 
 
 

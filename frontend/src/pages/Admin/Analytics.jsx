@@ -115,7 +115,7 @@ export default function AdminAnalytics() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="mb-6">
           {/* Listings over time */}
           <div className="bg-white rounded-2xl shadow-sm p-6">
             <h2 className="font-bold text-gray-900 mb-4">New Listings (Last 6 Months)</h2>
@@ -130,23 +130,6 @@ export default function AdminAnalytics() {
             </ResponsiveContainer>
           </div>
 
-          {/* Subscription plan breakdown */}
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Users by Subscription Plan</h2>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={data?.byPlan || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="plan" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip cursor={{ fill: '#f9fafb' }} />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={40}>
-                  {(data?.byPlan || []).map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </div>
 
         {/* Recent inquiries */}

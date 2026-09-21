@@ -1,18 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ExternalLink, Eye, MessageCircle } from 'lucide-react'
-import { propertyApi, subscriptionApi } from '../services/api'
+import { propertyApi } from '../services/api'
 import { formatPrice } from '../utils/helpers'
 import Skeleton from '../components/ui/Skeleton'
 
 export default function MyListings() {
   const qc = useQueryClient()
   const { data: properties, isLoading } = useQuery({ queryKey: ['my-properties'], queryFn: propertyApi.getMine })
-  const { data: sub } = useQuery({ queryKey: ['my-subscription'], queryFn: subscriptionApi.getMine })
 
   const deleteMut = useMutation({
     mutationFn: (id) => propertyApi.delete(id),
-    onSuccess: () => { qc.invalidateQueries(['my-properties']); qc.invalidateQueries(['my-subscription']) },
+    onSuccess: () => { qc.invalidateQueries(['my-properties']) },
   })
 
   return (
@@ -21,11 +20,7 @@ export default function MyListings() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Listings</h1>
-            {sub && (
-              <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
-                {sub.listingsUsed} / {sub.listingLimit === 999999 ? '∞' : sub.listingLimit} listings used on <b>{sub.plan}</b> plan
-              </p>
-            )}
+            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">All listings are free. No listing limit.</p>
           </div>
           <Link to="/post-property" className="btn-primary text-xs sm:text-sm py-2.5 px-4 shadow-md shadow-orange-500/20">
             <Plus size={16} /> Post New Property
