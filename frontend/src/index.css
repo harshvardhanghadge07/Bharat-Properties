@@ -230,9 +230,9 @@
 .estate-empty p { font-size: 13px; }
 .estate-property-card { border: 1px solid var(--estate-line); background: #fff; border-radius: 19px; overflow: hidden; transition: box-shadow .25s, transform .25s; height: 100%; }
 .estate-property-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px #30251a09; }
-.estate-property-image { height: 238px; position: relative; background: #e9e7e1; }
+.estate-property-image { width: 100%; height: auto; max-height: 400px; position: relative; background: #e9e7e1; }
 .estate-property-image > a { display: block; height: 100%; overflow: hidden; }
-.estate-property-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.estate-property-image img { width: 100%; height: auto; max-height: 100%; object-fit: contain; transition: transform .5s; }
 .estate-property-card:hover img { transform: scale(1.04); }
 .estate-property-badges { position: absolute; left: 14px; top: 14px; display: flex; flex-wrap: wrap; gap: 5px; pointer-events: none; right: 55px; }
 .estate-property-badges span { border-radius: 99px; background: #f9f8f5ed; padding: 6px 10px; font-family: monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
@@ -293,7 +293,7 @@
   .estate-section-heading h2 { font-size: 34px; }
   .estate-collection { padding-top: 24px; padding-bottom: 38px; }
   .estate-property-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
-  .estate-property-image { height: 210px; }
+  .estate-property-image { height: auto; max-height: 350px; }
   .estate-types { padding-block: 32px 40px; }
   .estate-types-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
   .estate-seller { padding: 28px; flex-direction: column; align-items: start; gap: 24px; margin-bottom: 40px; }
@@ -313,7 +313,7 @@
   .estate-image-arrow { padding: 8px; }
   .estate-popular { font-size: 9px; gap: 12px; }
   .estate-property-grid { grid-template-columns: 1fr; }
-  .estate-property-image { height: 245px; }
+  .estate-property-image { height: auto; max-height: 400px; }
   .estate-type { padding: 20px 16px; }
   .estate-type h3 { font-size: 24px; }
   .estate-type p { font-size: 9px; }
