@@ -183,10 +183,36 @@
 .estate-search .estate-button { padding: 14px 17px; }
 .estate-popular { display: flex; flex-wrap: wrap; gap: 8px 15px; align-items: center; margin: 17px 0 0 5px; font-size: 10px; color: var(--estate-muted); }
 .estate-popular a { color: #57534e; text-decoration: underline; text-decoration-color: #d6d3cc; text-underline-offset: 4px; }
-.estate-hero-image { display: block; position: relative; height: 505px; border-radius: 24px; overflow: hidden; isolation: isolate; background: #b4b4a7; }
-.estate-hero-image > img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s; }
-.estate-hero-image:hover > img { transform: scale(1.035); }
-.estate-hero-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.04) 45%, rgba(16,28,24,.74)); z-index: 0; }
+.estate-hero-image {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100vh; /* full viewport height */
+  aspect-ratio: 9/16; /* 9:16 ratio */
+  border-radius: 0; /* no rounded corners */
+  overflow: hidden;
+  isolation: isolate;
+  background: #b4b4a7;
+}
+
+.estate-hero-image > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s;
+}
+
+.estate-hero-image:hover > img {
+  transform: scale(1.035);
+}
+
+.estate-hero-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.04) 45%, rgba(16,28,24,.74));
+  z-index: 0;
+}
 .estate-image-tag { position: absolute; z-index: 1; left: 23px; top: 23px; background: rgba(249,248,245,.92); border-radius: 99px; padding: 8px 13px; text-transform: uppercase; font-family: monospace; letter-spacing: .12em; font-size: 9px; }
 .estate-image-caption { position: absolute; z-index: 1; bottom: 25px; left: 25px; right: 25px; display: flex; align-items: end; justify-content: space-between; gap: 10px; color: white; }
 .estate-image-caption .estate-eyebrow { color: #e5e7de; font-size: 9px; }
