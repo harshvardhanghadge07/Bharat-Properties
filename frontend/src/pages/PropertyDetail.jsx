@@ -107,12 +107,12 @@ export default function PropertyDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-              <div className="relative h-80 md:h-[450px] bg-gray-100">
+              <div className="relative w-full bg-gray-100" style={{ height: '700px' }}>
                 <motion.img 
-                  style={{ y: imgY, scale: 1.15 }} 
+                  style={{ y: imgY }} 
                   src={images[imgIdx]} 
                   alt={property.title} 
-                  className="w-full h-full object-cover origin-top cursor-pointer" 
+                  className="w-full h-full object-contain origin-top cursor-pointer" 
                   onClick={() => setIsViewerOpen(true)}
                 />
                 {/* Controls */}
