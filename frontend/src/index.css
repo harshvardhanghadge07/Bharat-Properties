@@ -239,13 +239,12 @@
 }
 .estate-property-image > a {
   display: block;
-  height: auto; /* let image dictate height */
-  overflow: hidden;
+  height: auto;
 }
 .estate-property-image img {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* fill container while keeping aspect */
+  height: auto;     /* natural height — no cropping */
+  display: block;
   transition: transform .5s;
 }
 .estate-property-card:hover img { transform: scale(1.04); }
