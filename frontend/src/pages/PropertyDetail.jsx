@@ -108,8 +108,7 @@ export default function PropertyDetail() {
             {/* Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
               <div className="relative w-full bg-gray-100">
-                <motion.img 
-                  style={{ y: imgY }} 
+                <img 
                   src={images[imgIdx]} 
                   alt={property.title} 
                   className="w-full h-auto block cursor-pointer" 
