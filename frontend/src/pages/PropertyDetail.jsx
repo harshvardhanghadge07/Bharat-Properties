@@ -316,38 +316,39 @@ export default function PropertyDetail() {
       {/* Full-screen Image Viewer */}
       {isViewerOpen && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/95 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsViewerOpen(false)
           }}
         >
           <button 
             onClick={() => setIsViewerOpen(false)}
-            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
+            className="fixed top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
           >
             <X size={32} />
           </button>
           
-          <div className="relative w-full max-w-6xl px-4 flex items-center justify-center h-full" onClick={(e) => {
+          <div className="relative w-full flex flex-col items-center justify-start py-12 px-4 min-h-full" onClick={(e) => {
             if (e.target === e.currentTarget) setIsViewerOpen(false)
           }}>
             <img 
               src={images[imgIdx]} 
               alt={property.title} 
-              className="max-w-full max-h-[90vh] object-contain"
+              className="w-full h-auto block"
+              style={{ maxWidth: '900px' }}
             />
             
             {images.length > 1 && (
               <>
                 <button 
                   onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
-                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="fixed left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={() => setImgIdx((i) => (i + 1) % images.length)}
-                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="fixed right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
                 >
                   <ChevronRight size={24} />
                 </button>
