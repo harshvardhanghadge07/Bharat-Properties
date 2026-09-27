@@ -37,11 +37,11 @@ export default function CookieConsent() {
         >
           <div className="bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl p-5 md:p-6 text-gray-800 relative overflow-hidden">
             {/* Ambient accent top bar */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-amber-500 to-primary-600" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-500" />
 
             <div className="flex items-start gap-3.5">
-              <div className="p-2.5 bg-orange-100 text-orange-600 rounded-xl flex-shrink-0 mt-0.5">
-                <Cookie className="w-6 h-6 animate-bounce" style={{ animationDuration: '2.5s' }} />
+              <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl flex-shrink-0 mt-0.5">
+                <Cookie className="w-6 h-6" />
               </div>
 
               <div className="flex-1 pr-4">
@@ -62,7 +62,7 @@ export default function CookieConsent() {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <button
                     onClick={handleAccept}
-                    className="btn-primary py-2.5 px-5 text-sm rounded-xl justify-center font-semibold shadow-md shadow-orange-500/20 hover:shadow-lg transition-all"
+                    className="btn-primary py-2.5 px-5 text-sm justify-center transition-all"
                   >
                     Allow All Cookies
                   </button>

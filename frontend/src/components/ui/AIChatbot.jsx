@@ -119,21 +119,20 @@ export default function AIChatbot() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="group flex items-center gap-2 bg-gradient-to-r from-primary-500 via-orange-500 to-amber-500 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl shadow-orange-500/40 relative overflow-hidden"
+            aria-label="Open Bharat AI assistant"
+            className="group flex items-center gap-2 bg-dark text-white p-3 sm:px-4 sm:py-3 rounded-full shadow-lg relative overflow-hidden"
           >
             {/* Glowing ring animation */}
-            <span className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-30" />
 
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
 
-            <span className="hidden sm:inline text-sm font-bold tracking-wide">
+            <span className="hidden sm:inline text-xs font-medium">
               Ask Bharat AI
             </span>
 
             <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
             </span>
           </motion.button>

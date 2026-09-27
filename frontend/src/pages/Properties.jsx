@@ -46,7 +46,7 @@ export default function Properties() {
     limit:    12,
   }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['properties', filters],
     queryFn: () => propertyApi.getAll(filters),
     keepPreviousData: true,
@@ -61,7 +61,7 @@ export default function Properties() {
       if (val) next.set(key, val)
       else next.delete(key)
     })
-    next.set('page', '1')
+    if (!Object.prototype.hasOwnProperty.call(updates, 'page')) next.set('page', '1')
     setParams(next)
   }
 
@@ -70,7 +70,12 @@ export default function Properties() {
   const activeCount = [filters.city, filters.type, filters.minPrice, filters.bedrooms].filter(Boolean).length
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
+    <div className="estate-listings pt-16 min-h-screen">
+      <div className="estate-listings-heading estate-container">
+        <p className="estate-eyebrow">Explore the collection · Bharat Properties</p>
+        <h1>A space for every chapter.</h1>
+        <p>Discover homes, land, and new possibilities across India.</p>
+      </div>
       <div className="bg-white border-b border-gray-200 sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
@@ -92,9 +97,10 @@ export default function Properties() {
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-2 text-sm text-gray-500 w-full sm:w-auto">
-            {!isLoading && <span className="hidden sm:inline-block whitespace-nowrap">{data?.pagination?.total || 0} properties</span>}
+            {!isLoading && !isError && <span className="hidden sm:inline-block whitespace-nowrap">{data?.pagination?.total || 0} properties</span>}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <select
+                aria-label="Sort properties"
                 value={filters.sort}
                 onChange={(e) => setFilter('sort', e.target.value)}
                 className="flex-1 sm:flex-none border border-gray-200 rounded-lg px-3 py-2 sm:py-1.5 text-sm focus:outline-none focus:border-primary-500"
@@ -228,6 +234,8 @@ export default function Properties() {
             <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {Array(9).fill(0).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}
             </div>
+          ) : isError ? (
+            <div className="estate-empty" role="status"><h3>We couldn’t load the collection.</h3><p>Please try again in a moment.</p><button onClick={() => refetch()} className="btn-primary">Try again</button></div>
           ) : !data?.properties?.length ? (
             <div className="text-center py-20 text-gray-400">
               <div className="text-6xl mb-4">🏠</div>

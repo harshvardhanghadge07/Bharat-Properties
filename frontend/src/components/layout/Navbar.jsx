@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { getInitials } from '../../utils/helpers'
 
 const navLinks = [
-  { label: 'Buy',   href: '/properties?status=ACTIVE' },
+  { label: 'Explore', href: '/properties?status=ACTIVE' },
   { label: 'Rent',  href: '/properties?status=RENTED' },
   { label: 'Support', href: '/support' },
   { label: 'About', href: '/about' },
@@ -14,38 +14,32 @@ const navLinks = [
 ]
 
 export default function Navbar() {
-  const [scrolled, setScrolled]     = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenu, setUserMenu]     = useState(false)
   const { user, isAuthenticated, logout } = useAuthStore()
   const location = useLocation()
   const navigate  = useNavigate()
-  const isHome    = location.pathname === '/'
-
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    setMobileOpen(false)
+    setUserMenu(false)
+  }, [location])
 
-  const transparent = isHome && !scrolled
-  const bg  = transparent ? 'bg-transparent' : 'bg-white shadow-md'
-  const txt = transparent ? 'text-white'      : 'text-gray-800'
+  const txt = 'text-stone-700'
 
   const handleLogout = () => { logout(); setUserMenu(false); navigate('/') }
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${bg}`}>
+    <header className="estate-navbar fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-primary-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 bg-dark flex items-center justify-center">
               <Building2 size={20} className="text-white" />
             </div>
             <div>
-              <span className={`font-serif font-bold text-lg leading-none ${txt}`}>Bharat</span>
-              <span className="block text-[10px] text-primary-500 font-semibold tracking-widest uppercase leading-none">Properties</span>
+              <span className="font-serif text-[27px] leading-none text-dark">BHARAT</span>
+              <span className="block text-[8px] text-stone-500 tracking-[0.3em] uppercase leading-none mt-1">Properties · India</span>
             </div>
           </Link>
 
@@ -70,6 +64,8 @@ export default function Navbar() {
                 <div className="relative">
                 <button
                   onClick={() => setUserMenu(!userMenu)}
+                  aria-expanded={userMenu}
+                  aria-label="Account menu"
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white hover:shadow-md transition-all"
                 >
                   <div className="w-7 h-7 bg-primary-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
@@ -114,14 +110,14 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Link to="/login" className={`text-sm font-medium hover:text-primary-500 transition-colors ${txt}`}>Login</Link>
+                <Link to="/login" className="estate-signin">Sign in</Link>
                 <Link to="/post-property" className="btn-primary text-sm py-2 px-4">Post Property</Link>
               </>
             )}
           </div>
 
           {/* Mobile hamburger */}
-          <button className={`md:hidden ${txt}`} onClick={() => setMobileOpen(!mobileOpen)}>
+          <button className={`md:hidden p-2 ${txt}`} aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>

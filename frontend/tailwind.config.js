@@ -5,18 +5,21 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  '#fff7ed',
-          100: '#ffedd5',
-          500: '#E8532A',
-          600: '#d44420',
-          700: '#b83519',
+          50:  '#faf2ed',
+          100: '#f3e3d7',
+          200: '#e4c7b4',
+          300: '#d1a487',
+          400: '#be805c',
+          500: '#a34e2f',
+          600: '#8b4027',
+          700: '#733521',
         },
         gold: '#C9A96E',
-        dark: '#1a1a1a',
+        dark: '#1c1917',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Playfair Display', 'serif'],
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       animation: {
         'fade-up': 'fadeUp 0.6s ease forwards',
