@@ -258,8 +258,8 @@ export default function PostProperty() {
             {form.images.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
                 {form.images.map((url, idx) => (
-                  <div key={url + idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
-                    <img src={url} alt={`Property photo ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div key={url + idx} className="relative self-start rounded-lg overflow-hidden border border-gray-200 group">
+                    <img src={url} alt={`Property photo ${idx + 1}`} className="block w-full h-auto" />
                     <button
                       type="button"
                       onClick={() => removeImage(idx)}

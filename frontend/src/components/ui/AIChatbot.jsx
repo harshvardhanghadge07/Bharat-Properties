@@ -216,7 +216,7 @@ export default function AIChatbot() {
                           <img
                             src={prop.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80'}
                             alt={prop.title}
-                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                            className="w-14 h-14 rounded-lg object-contain bg-stone-100 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-xs text-gray-900 truncate group-hover:text-primary-600">

@@ -461,7 +461,7 @@ export default function MapSearch({ properties = [], onBoundsChange }) {
             <Popup className="property-popup p-0">
               <div className="w-48 overflow-hidden rounded-lg !m-0">
                 <div className="h-28 bg-gray-100 relative">
-                  <img src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400'} alt={property.title} className="w-full h-full object-cover" />
+                  <img src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400'} alt={property.title} className="w-full h-full object-contain bg-stone-100" />
                   <span className="absolute top-2 left-2 bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{property.status}</span>
                 </div>
                 <div className="p-3 space-y-1">

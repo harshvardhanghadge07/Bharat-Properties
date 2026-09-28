@@ -42,7 +42,7 @@ export default function MyListings() {
                   <img
                     src={p.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80'}
                     alt=""
-                    className="w-20 h-16 rounded-xl object-cover shrink-0"
+                    className="w-20 h-16 rounded-xl object-contain bg-stone-100 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm truncate">{p.title}</p>

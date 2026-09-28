@@ -9,7 +9,8 @@ cloudinary.config({
 export const uploadImage = async (filePath) => {
   const result = await cloudinary.uploader.upload(filePath, {
     folder: 'bharat-properties',
-    transformation: [{ width: 1200, height: 800, crop: 'fill', quality: 'auto' }],
+    // Store the original image. Incoming transformations permanently crop/resize
+    // the stored asset, so responsive sizing belongs in the frontend instead.
   })
   return result.secure_url
 }

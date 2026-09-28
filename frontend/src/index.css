@@ -245,9 +245,7 @@
   width: 100%;
   height: auto;     /* natural height — no cropping */
   display: block;
-  transition: transform .5s;
 }
-.estate-property-card:hover img { transform: scale(1.04); }
 .estate-property-badges { position: absolute; left: 14px; top: 14px; display: flex; flex-wrap: wrap; gap: 5px; pointer-events: none; right: 55px; }
 .estate-property-badges span { border-radius: 99px; background: #f9f8f5ed; padding: 6px 10px; font-family: monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
 .estate-property-badges .estate-featured-badge { background: #e3eee6; color: #32684b; }

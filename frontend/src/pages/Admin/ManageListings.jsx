@@ -124,7 +124,7 @@ export default function ManageListings() {
                 )) : data?.properties?.map((p) => (
                   <tr key={p._id || p.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
-                      <img src={p.images?.[0]} alt="" className="w-14 h-10 rounded-lg object-cover" />
+                      <img src={p.images?.[0]} alt="" className="w-14 h-10 rounded-lg object-contain bg-stone-100" />
                     </td>
                     <td className="px-4 py-3 max-w-xs"><p className="font-medium text-gray-900 truncate">{p.title}</p></td>
                     <td className="px-4 py-3 text-gray-600">{p.city}</td>
@@ -230,8 +230,8 @@ export default function ManageListings() {
                     {form.images.length > 0 && (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
                         {form.images.map((url, idx) => (
-                          <div key={url + idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
-                            <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          <div key={url + idx} className="relative self-start rounded-lg overflow-hidden border border-gray-200 group">
+                            <img src={url} alt={`Photo ${idx + 1}`} className="block w-full h-auto" />
                             <button
                               type="button"
                               onClick={() => removeImage(idx)}
