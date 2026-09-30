@@ -17,13 +17,13 @@ export default function PropertyListItem({ property }) {
   }
 
   return (
-    <div className="card flex flex-col sm:flex-row group">
-      <Link to={`/properties/${property.id}`} className="relative w-full sm:w-64 self-start shrink-0 bg-stone-100">
+    <div className="estate-property-list card flex flex-col sm:flex-row group">
+      <Link to={`/properties/${property.id}`} className="estate-property-list-image relative w-full sm:w-64 self-start shrink-0 bg-stone-100">
         <PropertyImage src={img} alt={property.title} sizes="(max-width: 640px) 100vw, 256px" className="block w-full h-auto" />
         <span className={`badge absolute top-3 left-3 ${TYPE_COLORS[property.type]}`}>{TYPE_LABELS[property.type] || property.type}</span>
         {property.featured && <span className="badge absolute top-3 right-3 bg-primary-500 text-white">Featured</span>}
       </Link>
-      <div className="flex-1 p-5 flex flex-col justify-between">
+      <div className="min-w-0 min-h-0 flex-1 p-5 flex flex-col justify-between">
       <div>
           <div className="flex items-center gap-2 mb-1">
             <p className="text-2xl font-bold text-primary-500">{formatPrice(property.price)}</p>

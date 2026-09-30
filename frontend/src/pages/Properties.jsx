@@ -250,7 +250,7 @@ export default function Properties() {
                 {data.properties.map((p, i) => (
                   <React.Fragment key={p._id || p.id}>
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (i % 6) * 0.05 }}>
-                      {viewMode === 'grid' ? <PropertyCard3D property={p} /> : <PropertyListItem property={p} />}
+                      {viewMode === 'grid' ? <PropertyCard3D property={p} uniform /> : <PropertyListItem property={p} />}
                     </motion.div>
                     
                   </React.Fragment>

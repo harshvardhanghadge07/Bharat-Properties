@@ -71,7 +71,7 @@ export default function PropertyCarousel({ properties, total, hasMore, loadingMo
         </div>
       </div>
       <div ref={railRef} className="estate-carousel-rail" onScroll={updatePosition} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false) }} onTouchStart={() => setPaused(true)} onKeyDown={(event) => { if (event.target !== event.currentTarget) return; if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); setPaused(true); go(event.key === 'ArrowRight' ? 1 : -1) } }} tabIndex={0} aria-label="Swipe or use arrow keys to browse properties">
-        {properties.map((property, index) => <div className="estate-carousel-slide" key={property.id} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${total}`}><PropertyCard3D property={property} /></div>)}
+        {properties.map((property, index) => <div className="estate-carousel-slide" key={property.id} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${total}`}><PropertyCard3D property={property} uniform /></div>)}
       </div>
       {loadingMore && <p role="status" className="text-xs text-stone-500 mt-3">Loading more properties…</p>}
       {loadError && <div role="status" className="text-sm text-stone-600 mt-3">Couldn’t load the next listings. <button type="button" onClick={() => loadMore()} className="underline">Try again</button></div>}

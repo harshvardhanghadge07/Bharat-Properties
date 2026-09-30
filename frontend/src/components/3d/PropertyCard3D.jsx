@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
 import PropertyImage from '../ui/PropertyImage'
 
-export default function PropertyCard3D({ property }) {
+export default function PropertyCard3D({ property, uniform = false }) {
   const navigate = useNavigate()
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const [favoriteError, setFavoriteError] = useState('')
@@ -22,7 +22,7 @@ export default function PropertyCard3D({ property }) {
   }
 
   return (
-    <article className="estate-property-card">
+    <article className={`estate-property-card${uniform ? ' estate-property-card--uniform' : ''}`}>
       <div className="estate-property-image">
         <Link to={`/properties/${property.id}`} aria-label={`View ${property.title}`}><PropertyImage src={img} alt={property.title} /></Link>
         <div className="estate-property-badges"><span>{TYPE_LABELS[property.type] || property.type}</span>{property.featured && <span className="estate-featured-badge">Featured</span>}</div>
