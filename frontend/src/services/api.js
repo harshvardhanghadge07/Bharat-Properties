@@ -31,11 +31,11 @@ api.interceptors.response.use(
 )
 
 export const propertyApi = {
-  getAll:      (params) => api.get('/properties', { params }),
+  getAll:      (params, options = {}) => api.get('/properties', { ...options, params }),
   getFeatured: ()       => api.get('/properties/featured'),
   getStats:    ()       => api.get('/properties/stats'),
   getMine:     ()       => api.get('/properties/mine'),
-  getOne:      (id)     => api.get(`/properties/${id}`),
+  getOne:      (id, options = {}) => api.get(`/properties/${id}`, options),
   create:      (data)   => api.post('/properties', data),
   update:      (id, d)  => api.put(`/properties/${id}`, d),
   delete:      (id)     => api.delete(`/properties/${id}`),

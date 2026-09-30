@@ -75,7 +75,7 @@ export const prerenderProperty = async (req, res, next) => {
     const url = `${clientUrl()}/properties/${req.params.id}`
     const property = await Property.findById(req.params.id).lean()
 
-    if (!property) {
+    if (!property || !['ACTIVE', 'SOLD'].includes(property.status)) {
       res.set('Content-Type', 'text/html')
       return res.send(renderShell({
         title: `Property not found | ${SITE_NAME}`,
@@ -108,8 +108,8 @@ export const prerenderGeneric = (req, res) => {
   const url = `${clientUrl()}${path}`
   res.set('Content-Type', 'text/html')
   res.send(renderShell({
-    title: `${SITE_NAME} — Buy, Sell & Rent Property in India`,
-    description: 'Find verified apartments, villas, plots and commercial properties for sale and rent across major Indian cities.',
+    title: `${SITE_NAME} — Buy & Sell Property in India`,
+    description: 'Find verified apartments, villas, plots and commercial properties for sale across major Indian cities.',
     url,
   }))
 }

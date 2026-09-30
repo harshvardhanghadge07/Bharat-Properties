@@ -3,6 +3,7 @@ import { formatPrice, formatArea, TYPE_LABELS } from '../../utils/helpers'
 import { BedDouble, Bath, Maximize2, MapPin, Heart, ArrowUpRight } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
+import PropertyImage from '../ui/PropertyImage'
 
 export default function PropertyCard3D({ property }) {
   const navigate = useNavigate()
@@ -23,12 +24,12 @@ export default function PropertyCard3D({ property }) {
   return (
     <article className="estate-property-card">
       <div className="estate-property-image">
-        <Link to={`/properties/${property.id}`} aria-label={`View ${property.title}`}><img src={img} alt={property.title} loading="lazy" /></Link>
+        <Link to={`/properties/${property.id}`} aria-label={`View ${property.title}`}><PropertyImage src={img} alt={property.title} /></Link>
         <div className="estate-property-badges"><span>{TYPE_LABELS[property.type] || property.type}</span>{property.featured && <span className="estate-featured-badge">Featured</span>}</div>
         <button onClick={handleLike} disabled={saving} className="estate-favorite" aria-label={`${liked ? 'Remove from' : 'Add to'} favorites: ${property.title}`} aria-pressed={liked}><Heart size={17} className={liked ? 'fill-primary-500 text-primary-500' : ''} /></button>
       </div>
       <div className="estate-property-content">
-        <div className="estate-property-location"><MapPin size={12} /><span>{property.location || property.city}</span><span className="estate-property-status">{property.status === 'ACTIVE' ? 'For sale' : property.status === 'RENTED' ? 'Rent' : property.status}</span></div>
+        <div className="estate-property-location"><MapPin size={12} /><span>{property.location || property.city}</span><span className="estate-property-status">{property.status === 'ACTIVE' ? 'For sale' : property.status === 'SOLD' ? 'Sold' : 'Archived'}</span></div>
         <Link to={`/properties/${property.id}`} className="estate-property-title"><h3>{property.title}</h3><ArrowUpRight size={19} /></Link>
         <p className="estate-property-price">{formatPrice(property.price)}</p>
         <div className="estate-property-specs">

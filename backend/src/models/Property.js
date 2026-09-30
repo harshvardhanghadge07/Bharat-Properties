@@ -5,6 +5,7 @@ const propertySchema = new mongoose.Schema({
   description: { type: String, required: true },
   price:       { type: Number, required: true },
   type:        { type: String, required: true, enum: ['APARTMENT','VILLA','PLOT','COMMERCIAL','PENTHOUSE','FARMHOUSE','PG_HOSTEL','ROW_HOUSE','INDUSTRIAL_LAND','SHOP_SHOWROOM','WAREHOUSE','HOTEL_RESORT','BUNGALOW'] },
+  // Keep the legacy value readable for owners; API writes only allow ACTIVE/SOLD.
   status:      { type: String, enum: ['ACTIVE','SOLD','RENTED'], default: 'ACTIVE' },
 
   location:    { type: String, required: true },
@@ -18,8 +19,8 @@ const propertySchema = new mongoose.Schema({
   images:      [{ type: String }],
   amenities:   [{ type: String }],
   featured:    { type: Boolean, default: false },
-  lat:         { type: Number, default: null },
-  lng:         { type: Number, default: null },
+  lat:         { type: Number, min: -90, max: 90, default: null },
+  lng:         { type: Number, min: -180, max: 180, default: null },
 
   // Seller-facing stat: number of times the detail page has been viewed
   // (excludes the owner's own visits — see attachUserIfPresent + getProperty)

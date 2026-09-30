@@ -7,6 +7,7 @@ import { formatPrice, PROPERTY_TYPES, TYPE_LABELS } from '../../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../../utils/indiaData'
 import Skeleton from '../../components/ui/Skeleton'
 import AdminNav from '../../components/ui/AdminNav'
+import PropertyLocationPicker from '../../components/ui/PropertyLocationPicker'
 
 // All listings use the same photo limit.
 const ADMIN_PHOTO_LIMIT = 5
@@ -14,7 +15,7 @@ const ADMIN_PHOTO_LIMIT = 5
 const EMPTY = {
   title:'', description:'', price:'', type:'APARTMENT', status:'ACTIVE',
   location:'', city:'', state:'', pincode:'', bedrooms:'', bathrooms:'',
-  areaSqft:'', images:[], amenities:[], featured:false,
+  areaSqft:'', images:[], amenities:[], featured:false, lat: null, lng: null,
 }
 
 export default function ManageListings() {
@@ -30,15 +31,15 @@ export default function ManageListings() {
 
   const createMut = useMutation({
     mutationFn: (d) => propertyApi.create(d),
-    onSuccess: () => { qc.invalidateQueries(['properties']); closeModal() },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['properties'] }); closeModal() },
   })
   const updateMut = useMutation({
     mutationFn: ({ id, ...d }) => propertyApi.update(id, d),
-    onSuccess: () => { qc.invalidateQueries(['properties']); closeModal() },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['properties'] }); closeModal() },
   })
   const deleteMut = useMutation({
     mutationFn: (id) => propertyApi.delete(id),
-    onSuccess: () => qc.invalidateQueries(['properties']),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['properties'] }),
   })
 
   const openNew  = () => { setEditing(null); setForm(EMPTY); setModal(true) }
@@ -189,7 +190,7 @@ export default function ManageListings() {
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
                     <select {...inp('status')}>
-                      {['ACTIVE','SOLD','RENTED'].map((s) => <option key={s}>{s}</option>)}
+                      {['ACTIVE','SOLD'].map((s) => <option key={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
@@ -203,6 +204,7 @@ export default function ManageListings() {
                   <div className="col-span-2">
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Location *</label>
                     <input {...inp('location')} required placeholder="Bandra West, Mumbai" />
+                    <div className="mt-3"><PropertyLocationPicker lat={form.lat ?? null} lng={form.lng ?? null} onChange={(point) => setForm((current) => ({ ...current, ...point }))} /></div>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">City *</label>

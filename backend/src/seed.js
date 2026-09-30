@@ -183,7 +183,7 @@ const extraProperties = [
     featured: true,
   },
   {
-    title: 'Warehouse for Rent in Chakan',
+    title: 'Warehouse for Sale in Chakan',
     description: 'Large warehouse facility near Chakan industrial zone. Loading docks, high ceiling, 3-phase power. Suitable for logistics and storage.',
     price: 250000, type: 'WAREHOUSE', status: 'ACTIVE',
     location: 'Chakan MIDC, Pune', city: 'Pune', state: 'Maharashtra', pincode: '410501',

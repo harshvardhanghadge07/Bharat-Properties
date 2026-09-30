@@ -2,6 +2,21 @@ import mongoose from 'mongoose'
 import Property from '../models/Property.js'
 import Inquiry from '../models/Inquiry.js'
 const PHOTO_LIMIT = 5
+const SALE_STATUSES = ['ACTIVE', 'SOLD']
+
+const validateListing = (body) => {
+  if ('status' in body && !SALE_STATUSES.includes(body.status)) {
+    return 'Only for-sale and sold listings are supported.'
+  }
+  if ('lat' in body || 'lng' in body) {
+    if (body.lat === null && body.lng === null) return null
+    if (typeof body.lat !== 'number' || !Number.isFinite(body.lat) || Math.abs(body.lat) > 90 ||
+        typeof body.lng !== 'number' || !Number.isFinite(body.lng) || Math.abs(body.lng) > 180) {
+      return 'Choose a valid map location with both latitude and longitude, or remove the pin.'
+    }
+  }
+  return null
+}
 
 // Fields any listing owner may set from their own post/edit form
 const OWNER_EDITABLE_FIELDS = [
@@ -35,6 +50,10 @@ export const getProperties = async (req, res, next) => {
     } = req.query
 
     const filter = {}
+
+    if (status && !SALE_STATUSES.includes(status)) {
+      return res.status(400).json({ error: 'Only for-sale and sold listings are supported.' })
+    }
 
     if (search) filter.$text = { $search: search }
     if (city)   filter.city  = { $regex: city, $options: 'i' }
@@ -90,6 +109,10 @@ export const getProperty = async (req, res, next) => {
     const property = await Property.findById(req.params.id)
       .populate('owner', 'name phone emailVerified phoneVerified createdAt')
     if (!property) return res.status(404).json({ error: 'Property not found' })
+    const canManage = req.user && (req.user.role === 'ADMIN' || String(property.owner?._id || property.owner) === String(req.user._id))
+    if (!SALE_STATUSES.includes(property.status) && !canManage) {
+      return res.status(404).json({ error: 'Property not found' })
+    }
 
     // Track views for the seller's stats, but don't count the owner's own
     // visits (e.g. opening the edit page, or checking their own listing)
@@ -116,11 +139,11 @@ export const getFeaturedProperties = async (req, res, next) => {
 export const getStats = async (req, res, next) => {
   try {
     const [total, active, sold, cities, states] = await Promise.all([
-      Property.countDocuments(),
+      Property.countDocuments({ status: { $in: SALE_STATUSES } }),
       Property.countDocuments({ status: 'ACTIVE' }),
       Property.countDocuments({ status: 'SOLD' }),
-      Property.distinct('city'),
-      Property.distinct('state'),
+      Property.distinct('city', { status: { $in: SALE_STATUSES } }),
+      Property.distinct('state', { status: { $in: SALE_STATUSES } }),
     ])
     res.json({ total, active, sold, cities: cities.length, states: states.length })
   } catch (err) { next(err) }
@@ -149,6 +172,8 @@ export const getMyProperties = async (req, res, next) => {
 
 export const createProperty = async (req, res, next) => {
   try {
+    const validationError = validateListing(req.body)
+    if (validationError) return res.status(400).json({ error: validationError })
     const photoLimit = PHOTO_LIMIT
     if (Array.isArray(req.body.images) && req.body.images.length > photoLimit) {
       return res.status(400).json({
@@ -175,6 +200,9 @@ export const updateProperty = async (req, res, next) => {
     if (req.user.role !== 'ADMIN' && String(property.owner) !== String(req.user._id)) {
       return res.status(403).json({ error: 'Not authorized to edit this listing' })
     }
+
+    const validationError = validateListing(req.body)
+    if (validationError) return res.status(400).json({ error: validationError })
 
     if (Array.isArray(req.body.images)) {
       const photoLimit = PHOTO_LIMIT

@@ -6,11 +6,12 @@ import { propertyApi, uploadApi } from '../services/api'
 import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../utils/indiaData'
 import { useAuthStore } from '../store/useAuthStore'
+import PropertyLocationPicker from '../components/ui/PropertyLocationPicker'
 
 const EMPTY = {
   title:'', description:'', price:'', type:'APARTMENT',
   location:'', city:'', state:'', pincode:'', bedrooms:'', bathrooms:'',
-  areaSqft:'', images:[], amenities:[],
+  areaSqft:'', images:[], amenities:[], lat: null, lng: null,
 }
 
 export default function PostProperty() {
@@ -42,6 +43,8 @@ export default function PostProperty() {
       city: existingProperty.city || '',
       state: existingProperty.state || '',
       pincode: existingProperty.pincode || '',
+      lat: existingProperty.lat ?? null,
+      lng: existingProperty.lng ?? null,
       bedrooms: existingProperty.bedrooms ?? '',
       bathrooms: existingProperty.bathrooms ?? '',
       areaSqft: existingProperty.areaSqft ?? '',
@@ -52,7 +55,8 @@ export default function PostProperty() {
   const createMut = useMutation({
     mutationFn: (data) => propertyApi.create(data),
     onSuccess: () => {
-      qc.invalidateQueries(['my-properties'])
+      qc.invalidateQueries({ queryKey: ['my-properties'] })
+      qc.invalidateQueries({ queryKey: ['properties'] })
       setSuccess(true)
     },
     onError: (err) => {
@@ -64,8 +68,9 @@ export default function PostProperty() {
   const updateMut = useMutation({
     mutationFn: (data) => propertyApi.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries(['my-properties'])
-      qc.invalidateQueries(['property', id])
+      qc.invalidateQueries({ queryKey: ['my-properties'] })
+      qc.invalidateQueries({ queryKey: ['properties'] })
+      qc.invalidateQueries({ queryKey: ['property', id] })
       setSuccess(true)
     },
     onError: (err) => alert(err.error || 'Failed to update listing'),
@@ -220,8 +225,8 @@ export default function PostProperty() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location / Locality *</label>
-            <input {...inp('location')} required placeholder="Andheri West, Mumbai" />
+            <label htmlFor="property-address" className="block text-sm font-medium text-gray-700 mb-1">Address / Locality *</label>
+            <input id="property-address" {...inp('location')} required placeholder="Building, street, locality" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -244,6 +249,8 @@ export default function PostProperty() {
               </select>
             </div>
           </div>
+
+          <PropertyLocationPicker lat={form.lat} lng={form.lng} onChange={(point) => setForm((current) => ({ ...current, ...point }))} />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

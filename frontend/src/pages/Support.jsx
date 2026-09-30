@@ -67,7 +67,7 @@ const FAQS = [
   },
   {
     cat: 'posting',
-    q: 'How do I post a property for sale or rent?',
+    q: 'How do I post a property for sale?',
     a: 'Click on the "Post Property" button in the navigation header. Fill in your property details, upload clear photos, set your price, and publish your listing instantly.',
   },
   {
@@ -78,7 +78,7 @@ const FAQS = [
   {
     cat: 'posting',
     q: 'Can I edit or delete my property listing after posting?',
-    a: 'Yes! Go to "My Listings" from your account dropdown menu. You can edit property details, price, photos, or mark the property as sold/rented anytime.',
+    a: 'Yes! Go to "My Listings" from your account dropdown menu. You can edit property details, price, photos, and amenities anytime.',
   },
   {
     cat: 'account',

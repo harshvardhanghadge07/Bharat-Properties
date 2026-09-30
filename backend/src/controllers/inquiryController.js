@@ -18,7 +18,7 @@ export const createInquiry = async (req, res, next) => {
     }
 
     const property = await Property.findById(propertyId)
-    if (!property) return res.status(404).json({ error: 'Property not found' })
+    if (!property || !['ACTIVE', 'SOLD'].includes(property.status)) return res.status(404).json({ error: 'Property not found' })
 
     const inquiry = await Inquiry.create({
       name, email, phone, message,

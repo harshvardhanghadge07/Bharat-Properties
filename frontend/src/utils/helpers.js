@@ -60,7 +60,6 @@ export const TYPE_COLORS = {
 export const STATUS_COLORS = {
   ACTIVE: 'bg-green-100 text-green-700',
   SOLD:   'bg-red-100 text-red-700',
-  RENTED: 'bg-orange-100 text-orange-700',
 }
 
 // Backward compat — full lists now come from indiaData

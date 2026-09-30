@@ -6,8 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { getInitials } from '../../utils/helpers'
 
 const navLinks = [
-  { label: 'Explore', href: '/properties?status=ACTIVE' },
-  { label: 'Rent',  href: '/properties?status=RENTED' },
+  { label: 'Home', href: '/' },
   { label: 'Support', href: '/support' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },

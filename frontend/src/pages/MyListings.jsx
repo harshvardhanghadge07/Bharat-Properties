@@ -11,7 +11,10 @@ export default function MyListings() {
 
   const deleteMut = useMutation({
     mutationFn: (id) => propertyApi.delete(id),
-    onSuccess: () => { qc.invalidateQueries(['my-properties']) },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-properties'] })
+      qc.invalidateQueries({ queryKey: ['properties'] })
+    },
   })
 
   return (
@@ -57,7 +60,7 @@ export default function MyListings() {
 
                 <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 w-full sm:w-auto">
                   <span className={`tag text-xs font-semibold ${p.status==='ACTIVE'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600'}`}>
-                    {p.status}
+                    {p.status === 'ACTIVE' ? 'For sale' : p.status === 'SOLD' ? 'Sold' : 'Archived'}
                   </span>
                   <div className="flex items-center gap-1">
                     <Link to={`/properties/${p.id}`} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors" title="View">

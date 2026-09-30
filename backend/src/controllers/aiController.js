@@ -9,6 +9,9 @@ export const chatWithAI = async (req, res, next) => {
     }
 
     const query = message.trim().toLowerCase()
+    if (/\b(rent|rental|rentals|rented|renting|lease|leasing)\b/.test(query)) {
+      return res.json({ replyText: 'Bharat Properties supports buying and selling properties. You can explore properties for sale or post a sale listing.', properties: [], suggestions: ['Properties for sale in Mumbai', 'How to post a property for sale?'] })
+    }
     let replyText = ''
     let matchedProperties = []
     let suggestions = []
@@ -65,11 +68,6 @@ export const chatWithAI = async (req, res, next) => {
     else if (query.includes('plot') || query.includes('land')) searchFilter.type = 'PLOT'
     else if (query.includes('commercial') || query.includes('shop') || query.includes('office')) searchFilter.type = 'COMMERCIAL'
     else if (query.includes('apartment') || query.includes('flat') || query.includes('bhk')) searchFilter.type = 'APARTMENT'
-
-    // Detect rent vs buy
-    if (query.includes('rent') || query.includes('lease')) {
-      searchFilter.status = 'RENTED'
-    }
 
     // Find up to 4 matching properties
     matchedProperties = await Property.find(searchFilter)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SlidersHorizontal, Grid3x3, List, X, ChevronDown } from 'lucide-react'
 import { propertyApi } from '../services/api'
@@ -27,7 +27,7 @@ export default function Properties() {
 
   useSEO({
     title: 'Browse Properties in India | Bharat Properties',
-    description: 'Search verified apartments, villas, plots and commercial properties for sale and rent across major Indian cities. Filter by city, price, and property type.',
+    description: 'Search verified apartments, villas, plots and commercial properties for sale across major Indian cities. Filter by city, price, and property type.',
     url: `${window.location.origin}/properties`,
   })
 
@@ -36,7 +36,7 @@ export default function Properties() {
     city:     params.get('city')   || '',
     state:    params.get('state')  || '',
     type:     params.get('type')   || '',
-    status:   params.get('status') || 'ACTIVE',
+    status:   params.get('status') === 'SOLD' ? 'SOLD' : 'ACTIVE',
     minPrice: params.get('minPrice') || '',
     maxPrice: params.get('maxPrice') || '',
     bedrooms: params.get('bedrooms') || '',
@@ -46,10 +46,10 @@ export default function Properties() {
     limit:    12,
   }
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isFetching, isPlaceholderData, isError, refetch } = useQuery({
     queryKey: ['properties', filters],
-    queryFn: () => propertyApi.getAll(filters),
-    keepPreviousData: true,
+    queryFn: ({ signal }) => propertyApi.getAll(filters, { signal }),
+    placeholderData: keepPreviousData,
   })
 
 
@@ -245,7 +245,8 @@ export default function Properties() {
             </div>
           ) : (
             <>
-              <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+              {isFetching && <p role="status" className="text-sm text-stone-500 mb-3">Updating properties…</p>}
+              <div aria-busy={isFetching} className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                 {data.properties.map((p, i) => (
                   <React.Fragment key={p._id || p.id}>
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (i % 6) * 0.05 }}>
@@ -260,6 +261,7 @@ export default function Properties() {
                 <div className="flex justify-center gap-2 mt-10">
                   {Array.from({ length: data.pagination.pages }, (_, i) => i + 1).map((pg) => (
                     <button key={pg}
+                      disabled={isPlaceholderData}
                       onClick={() => setFilter('page', pg)}
                       className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
                         filters.page === pg ? 'bg-primary-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-primary-300'

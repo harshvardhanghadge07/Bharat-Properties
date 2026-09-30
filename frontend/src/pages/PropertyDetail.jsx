@@ -11,6 +11,7 @@ import SimilarProperties from '../components/ui/SimilarProperties'
 import useSEO from '../hooks/useSEO'
 import { useAuthStore } from '../store/useAuthStore'
 import VerifiedBadge from '../components/ui/VerifiedBadge'
+import PropertyImage from '../components/ui/PropertyImage'
 
 export default function PropertyDetail() {
   const { id } = useParams()
@@ -24,9 +25,9 @@ export default function PropertyDetail() {
   const { scrollY } = useScroll()
   const imgY = useTransform(scrollY, [0, 500], ['0%', '15%'])
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading, isError, refetch } = useQuery({
     queryKey: ['property', id],
-    queryFn: () => propertyApi.getOne(id),
+    queryFn: ({ signal }) => propertyApi.getOne(id, { signal }),
   })
 
   useSEO({
@@ -58,6 +59,7 @@ export default function PropertyDetail() {
     </div>
   )
 
+  if (isError) return <div className="pt-24 pb-16 text-center text-gray-500" role="status"><p>We couldn’t load this property. Please try again.</p><button onClick={() => refetch()} className="btn-primary mt-4">Try again</button></div>
   if (!property) return <div className="pt-24 text-center text-gray-500">Property not found</div>
 
   const liked = isFavorite(property.id)
@@ -84,7 +86,8 @@ export default function PropertyDetail() {
   // Google Maps embed — uses exact lat/lng if the listing has them, otherwise falls back to address query
   const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
   const isRealApiKey = mapsApiKey && !mapsApiKey.includes('AIzaSyDwPxG') && mapsApiKey.length > 20
-  const mapQuery = property.lat && property.lng
+  const hasMapPin = Number.isFinite(property.lat) && Number.isFinite(property.lng)
+  const mapQuery = hasMapPin
     ? `${property.lat},${property.lng}`
     : encodeURIComponent(`${property.location}, ${property.city}, ${property.state}`)
   const mapEmbedUrl = isRealApiKey
@@ -108,9 +111,14 @@ export default function PropertyDetail() {
             {/* Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
               <div className="relative w-full bg-gray-100">
-                <img 
+                <PropertyImage
                   src={images[imgIdx]} 
                   alt={property.title} 
+                  width={1280}
+                  widths={[640, 960, 1280, 1920]}
+                  sizes="(max-width: 1024px) 100vw, 850px"
+                  loading="eager"
+                  fetchPriority="high"
                   className="w-full h-auto block cursor-pointer" 
                   onClick={() => setIsViewerOpen(true)}
                 />
@@ -137,7 +145,7 @@ export default function PropertyDetail() {
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className={`badge ${TYPE_COLORS[property.type]}`}>{TYPE_LABELS[property.type] || property.type}</span>
                   {property.featured && <span className="badge bg-primary-500 text-white">Featured</span>}
-                  <span className={`badge ${STATUS_COLORS[property.status]}`}>{property.status}</span>
+                  <span className={`badge ${STATUS_COLORS[property.status] || 'bg-gray-100 text-gray-600'}`}>{property.status === 'ACTIVE' ? 'For sale' : property.status === 'SOLD' ? 'Sold' : 'Archived'}</span>
                 </div>
                 {/* Action buttons */}
                 <div className="absolute top-4 right-4 flex gap-2">
@@ -156,7 +164,7 @@ export default function PropertyDetail() {
                   {images.map((img, i) => (
                     <button key={i} onClick={() => setImgIdx(i)}
                       className={`shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? 'border-primary-500' : 'border-transparent'}`}>
-                      <img src={img} alt="" className="w-full h-full object-contain bg-stone-100" />
+                      <PropertyImage src={img} alt="" width={160} widths={[80, 160, 240]} sizes="80px" placeholderHeight={0} className="w-full h-full object-contain bg-stone-100" />
                     </button>
                   ))}
                 </div>
