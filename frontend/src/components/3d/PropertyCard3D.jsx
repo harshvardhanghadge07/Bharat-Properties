@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
 import PropertyImage from '../ui/PropertyImage'
 
-export default function PropertyCard3D({ property, uniform = false }) {
+export default function PropertyCard3D({ property, uniform = false, imageLoading = 'lazy' }) {
   const navigate = useNavigate()
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const [favoriteError, setFavoriteError] = useState('')
@@ -24,7 +24,7 @@ export default function PropertyCard3D({ property, uniform = false }) {
   return (
     <article className={`estate-property-card${uniform ? ' estate-property-card--uniform' : ''}`}>
       <div className="estate-property-image">
-        <Link to={`/properties/${property.id}`} aria-label={`View ${property.title}`}><PropertyImage src={img} alt={property.title} /></Link>
+        <Link to={`/properties/${property.id}`} aria-label={`View ${property.title}`}><PropertyImage src={img} alt={property.title} loading={imageLoading} sizes={uniform ? '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw' : undefined} /></Link>
         <div className="estate-property-badges"><span>{TYPE_LABELS[property.type] || property.type}</span>{property.featured && <span className="estate-featured-badge">Featured</span>}</div>
         <button onClick={handleLike} disabled={saving} className="estate-favorite" aria-label={`${liked ? 'Remove from' : 'Add to'} favorites: ${property.title}`} aria-pressed={liked}><Heart size={17} className={liked ? 'fill-primary-500 text-primary-500' : ''} /></button>
       </div>

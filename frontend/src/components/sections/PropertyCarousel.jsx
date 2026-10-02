@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react'
 import PropertyCard3D from '../3d/PropertyCard3D'
+import { carouselMove, shouldLoadCarouselImage } from '../../utils/propertyCarousel'
 
 export default function PropertyCarousel({ properties, total, hasMore, loadingMore, loadMore, loadError }) {
   const railRef = useRef(null)
@@ -17,14 +18,9 @@ export default function PropertyCarousel({ properties, total, hasMore, loadingMo
     if (!rail) return
     const maxScroll = rail.scrollWidth - rail.clientWidth
     const step = rail.children[1] ? rail.children[1].offsetLeft - rail.children[0].offsetLeft : rail.clientWidth
-    let target = rail.scrollLeft + direction * step
-    if (direction > 0 && rail.scrollLeft >= maxScroll - 2) {
-      if (hasMore) { if (!loadingMore) loadMore(); return }
-      target = 0
-    } else if (direction < 0 && rail.scrollLeft <= 2) {
-      target = maxScroll
-    }
-    rail.scrollTo({ left: Math.max(0, Math.min(maxScroll, target)), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    const { target, requestPage } = carouselMove({ scrollLeft: rail.scrollLeft, maxScroll, step, direction, hasMore, loadingMore, loadError })
+    if (requestPage) loadMore()
+    rail.scrollTo({ left: target, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   }
 
   useEffect(() => {
@@ -42,16 +38,16 @@ export default function PropertyCarousel({ properties, total, hasMore, loadingMo
   }, [properties.length])
 
   useEffect(() => {
-    if (paused || hovered || focused || !visible || (!canSlide && !hasMore) || loadError) return
+    if (paused || hovered || focused || !visible || (!canSlide && (!hasMore || loadError))) return
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') go(1)
-    }, 3500)
+    }, 2000)
     return () => clearInterval(timer)
   }, [paused, hovered, focused, visible, canSlide, hasMore, loadingMore, loadError, properties.length])
 
   // Fetch the next API page before the carousel reaches the loaded tail.
   useEffect(() => {
-    if (visible && hasMore && !loadingMore && !loadError && position + 5 >= properties.length) loadMore()
+    if (visible && hasMore && !loadingMore && !loadError && position + 8 >= properties.length) loadMore()
   }, [visible, hasMore, loadingMore, loadError, position, properties.length, loadMore])
 
   const updatePosition = () => {
@@ -71,10 +67,10 @@ export default function PropertyCarousel({ properties, total, hasMore, loadingMo
         </div>
       </div>
       <div ref={railRef} className="estate-carousel-rail" onScroll={updatePosition} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false) }} onTouchStart={() => setPaused(true)} onKeyDown={(event) => { if (event.target !== event.currentTarget) return; if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); setPaused(true); go(event.key === 'ArrowRight' ? 1 : -1) } }} tabIndex={0} aria-label="Swipe or use arrow keys to browse properties">
-        {properties.map((property, index) => <div className="estate-carousel-slide" key={property.id} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${total}`}><PropertyCard3D property={property} uniform /></div>)}
+        {properties.map((property, index) => <div className="estate-carousel-slide" key={property.id} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${total}`}><PropertyCard3D property={property} uniform imageLoading={shouldLoadCarouselImage(index, position, visible) ? 'eager' : 'lazy'} /></div>)}
       </div>
       {loadingMore && <p role="status" className="text-xs text-stone-500 mt-3">Loading more properties…</p>}
-      {loadError && <div role="status" className="text-sm text-stone-600 mt-3">Couldn’t load the next listings. <button type="button" onClick={() => loadMore()} className="underline">Try again</button></div>}
+      {loadError && <div role="status" className="text-sm text-stone-600 mt-3">Couldn’t load the next listings. <button type="button" onClick={() => loadMore()} disabled={loadingMore} className="underline">Try again</button></div>}
     </div>
   )
 }
