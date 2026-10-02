@@ -17,8 +17,8 @@ export default function PropertyListItem({ property }) {
   }
 
   return (
-    <div className="estate-property-list card flex flex-col sm:flex-row group">
-      <Link to={`/properties/${property.id}`} className="estate-property-list-image relative w-full sm:w-64 self-start shrink-0 bg-stone-100">
+    <div className="card flex flex-col sm:flex-row group">
+      <Link to={`/properties/${property.id}`} className="relative w-full sm:w-64 self-start shrink-0 bg-stone-100">
         <PropertyImage src={img} alt={property.title} sizes="(max-width: 640px) 100vw, 256px" className="block w-full h-auto" />
         <span className={`badge absolute top-3 left-3 ${TYPE_COLORS[property.type]}`}>{TYPE_LABELS[property.type] || property.type}</span>
         {property.featured && <span className="badge absolute top-3 right-3 bg-primary-500 text-white">Featured</span>}

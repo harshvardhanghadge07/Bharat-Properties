@@ -45,7 +45,7 @@ export default function PropertyCarousel({ properties, total, hasMore, loadingMo
     if (paused || hovered || focused || !visible || (!canSlide && !hasMore) || loadError) return
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') go(1)
-    }, 5000)
+    }, 3500)
     return () => clearInterval(timer)
   }, [paused, hovered, focused, visible, canSlide, hasMore, loadingMore, loadError, properties.length])
 
