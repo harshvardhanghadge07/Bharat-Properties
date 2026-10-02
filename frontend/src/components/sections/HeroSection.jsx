@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowDown, ArrowUpRight, Search } from 'lucide-react'
+import { ArrowUpRight, Search } from 'lucide-react'
 import { PROPERTY_TYPES, TYPE_LABELS } from '../../utils/helpers'
 
 export default function HeroSection() {
@@ -39,12 +39,6 @@ export default function HeroSection() {
         </form>
         <div className="estate-popular"><span>Popular cities</span>{['Mumbai', 'Delhi', 'Bengaluru'].map((city) => <Link key={city} to={`/properties?city=${city}`}>{city}</Link>)}</div>
       </div>
-      <Link to="/properties?type=VILLA" className="estate-hero-image" aria-label="Explore villas">
-        <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=85" alt="Contemporary villa with a sunlit terrace and swimming pool" fetchPriority="high" />
-        <span className="estate-image-tag">Spaces that inspire</span>
-        <div className="estate-image-caption"><div><p className="estate-eyebrow">Discover the villa collection</p><h2>A little more extraordinary.</h2></div><span className="estate-image-arrow"><ArrowUpRight size={24} /></span></div>
-      </Link>
-      <a className="estate-discover" href="#collection">Find your next chapter <ArrowDown size={14} /></a>
     </section>
   )
 }
