@@ -44,6 +44,7 @@ const getGmailTransporter = () => {
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
+    socketTimeout: 15000,
   })
 }
 
@@ -55,15 +56,15 @@ const getFromAddress = () =>
   'noreply@bharat-realestate.com'
 
 // ─── Generic send helper ───────────────────────────────────────────────────
-const sendEmail = async ({ to, subject, html, devLog }) => {
+const sendEmail = async ({ to, subject, html, devLog, replyTo }) => {
   // 1. Try Brevo SMTP first (primary — works on Render cloud servers & sends to any address)
   const brevo = getBrevoTransporter()
   if (brevo) {
     try {
       const from = process.env.BREVO_FROM || 'Bharat Properties <bharatestates3@gmail.com>'
-      await brevo.sendMail({ from, to, subject, html })
+      await brevo.sendMail({ from, to, subject, html, replyTo })
       console.log(`✅ Email sent via Brevo SMTP to: ${to}`)
-      return
+      return true
     } catch (err) {
       console.error('⚠️ Brevo SMTP failed:', err.message, '— trying fallback...')
     }
@@ -74,9 +75,9 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
   if (gmail) {
     try {
       const from = process.env.EMAIL_FROM || process.env.EMAIL_USER
-      await gmail.sendMail({ from, to, subject, html })
+      await gmail.sendMail({ from, to, subject, html, replyTo })
       console.log(`✅ Email sent via Gmail SMTP to: ${to}`)
-      return
+      return true
     } catch (err) {
       console.error('⚠️ Gmail SMTP failed:', err.message, '— trying fallback...')
     }
@@ -87,10 +88,10 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
   if (resend) {
     try {
       const from = process.env.RESEND_FROM || 'onboarding@resend.dev'
-      const { error } = await resend.emails.send({ from, to, subject, html })
+      const { error } = await resend.emails.send({ from, to, subject, html, replyTo })
       if (error) throw new Error(error.message)
       console.log(`✅ Email sent via Resend to: ${to}`)
-      return
+      return true
     } catch (err) {
       console.error('⚠️ Resend failed:', err.message, '— trying fallback...')
     }
@@ -98,6 +99,7 @@ const sendEmail = async ({ to, subject, html, devLog }) => {
 
   // 4. Nothing configured or all failed — dev mode
   console.log(`\n📧 [DEV MODE] ${devLog}\n   (Configure BREVO_SMTP_USER/PASS in .env to send real emails)\n`)
+  return false
 }
 
 // ─── Public helpers ────────────────────────────────────────────────────────
@@ -146,18 +148,22 @@ export const sendResetPasswordEmail = async (user, resetUrl) => {
   })
 }
 
-export const sendInquiryEmail = async (inquiry) => {
-  const to = process.env.EMAIL_USER || process.env.BREVO_FROM || process.env.RESEND_FROM
-  await sendEmail({
+const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]))
+
+export const sendInquiryEmail = async (inquiry, ownerEmail) => {
+  if (!ownerEmail) throw new Error('Listing owner email is required')
+  const to = ownerEmail
+  return sendEmail({
     to,
+    replyTo: inquiry.email,
     subject: `New Inquiry: ${inquiry.property?.title || 'Property'}`,
     html: `
       <h2 style="color:#E8532A">New Property Inquiry — Bharat Properties</h2>
-      <p><b>Property:</b> ${inquiry.property?.title} (${inquiry.property?.city})</p>
-      <p><b>From:</b> ${inquiry.name}</p>
-      <p><b>Email:</b> ${inquiry.email}</p>
-      <p><b>Phone:</b> ${inquiry.phone || 'Not provided'}</p>
-      <p><b>Message:</b><br/>${inquiry.message}</p>
+      <p><b>Property:</b> ${escapeHtml(inquiry.property?.title)} (${escapeHtml(inquiry.property?.city)})</p>
+      <p><b>From:</b> ${escapeHtml(inquiry.name)}</p>
+      <p><b>Email:</b> ${escapeHtml(inquiry.email)}</p>
+      <p><b>Phone:</b> ${escapeHtml(inquiry.phone || 'Not provided')}</p>
+      <p><b>Message:</b><br/>${escapeHtml(inquiry.message)}</p>
     `,
     devLog: `Inquiry notification for: ${inquiry.property?.title}`,
   })

@@ -1,9 +1,11 @@
+import PropertyTypeFields from '../components/ui/PropertyTypeFields'
+import ListingContactFields from '../components/ui/ListingContactFields'
+import { propertyPayload, normalizePropertyType } from '../utils/propertyFields'
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, AlertCircle, X, Loader2, ImagePlus } from 'lucide-react'
 import { propertyApi, uploadApi } from '../services/api'
-import { PROPERTY_TYPES, TYPE_LABELS } from '../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../utils/indiaData'
 import { useAuthStore } from '../store/useAuthStore'
 import PropertyLocationPicker from '../components/ui/PropertyLocationPicker'
@@ -11,7 +13,7 @@ import PropertyLocationPicker from '../components/ui/PropertyLocationPicker'
 const EMPTY = {
   title:'', description:'', price:'', type:'APARTMENT',
   location:'', city:'', state:'', pincode:'', bedrooms:'', bathrooms:'',
-  areaSqft:'', images:[], amenities:[], lat: null, lng: null,
+  areaSqft:'', whatsappNumber:'', details:{}, images:[], amenities:[], lat: null, lng: null,
 }
 
 export default function PostProperty() {
@@ -38,7 +40,9 @@ export default function PostProperty() {
       title: existingProperty.title || '',
       description: existingProperty.description || '',
       price: existingProperty.price ?? '',
-      type: existingProperty.type || 'APARTMENT',
+      type: normalizePropertyType(existingProperty.type || 'APARTMENT'),
+      whatsappNumber: existingProperty.whatsappNumber || '',
+      details: existingProperty.details || {},
       location: existingProperty.location || '',
       city: existingProperty.city || '',
       state: existingProperty.state || '',
@@ -63,7 +67,6 @@ export default function PostProperty() {
       alert(err.error || 'Failed to create listing')
     },
   })
-  
 
   const updateMut = useMutation({
     mutationFn: (data) => propertyApi.update(id, data),
@@ -122,13 +125,7 @@ export default function PostProperty() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const payload = {
-      ...form,
-      price: parseFloat(form.price),
-      areaSqft: parseFloat(form.areaSqft),
-      bedrooms: form.bedrooms ? parseInt(form.bedrooms) : null,
-      bathrooms: form.bathrooms ? parseInt(form.bathrooms) : null,
-    }
+    const payload = propertyPayload(form)
     if (isEditMode) updateMut.mutate(payload)
     else createMut.mutate(payload)
   }
@@ -197,32 +194,13 @@ export default function PostProperty() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
-              <input {...inp('price')} type="number" required placeholder="5000000" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Area (sq.ft) *</label>
-              <input {...inp('areaSqft')} type="number" required placeholder="1200" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-              <select {...inp('type')} required>
-                {PROPERTY_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-              <input {...inp('bedrooms')} type="number" placeholder="3" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-              <input {...inp('bathrooms')} type="number" placeholder="2" />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
               <input {...inp('pincode')} placeholder="400001" />
             </div>
           </div>
+
+          <PropertyTypeFields form={form} setForm={setForm} />
+          <ListingContactFields form={form} setForm={setForm} email={isEditMode ? (existingProperty?.owner?.id === user?.id ? user?.email : undefined) : user?.email} />
 
           <div>
             <label htmlFor="property-address" className="block text-sm font-medium text-gray-700 mb-1">Address / Locality *</label>
@@ -250,7 +228,7 @@ export default function PostProperty() {
             </div>
           </div>
 
-          <PropertyLocationPicker lat={form.lat} lng={form.lng} onChange={(point) => setForm((current) => ({ ...current, ...point }))} />
+          <PropertyLocationPicker address={[form.location, form.city, form.state].filter(Boolean).join(', ')} lat={form.lat} lng={form.lng} onChange={(point) => setForm((current) => ({ ...current, ...point }))} />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

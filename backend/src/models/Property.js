@@ -1,4 +1,7 @@
 import mongoose from 'mongoose'
+import { DETAIL_RULES } from '../utils/propertyRules.js'
+
+const detailsSchema = new mongoose.Schema(Object.fromEntries(Object.entries(DETAIL_RULES).map(([key, rule]) => [key, rule.type === 'number' ? { type: Number, min: rule.min } : { type: String, enum: rule.options }])), { _id: false })
 
 const propertySchema = new mongoose.Schema({
   title:       { type: String, required: true, trim: true },
@@ -16,6 +19,8 @@ const propertySchema = new mongoose.Schema({
   bedrooms:    { type: Number, default: null },
   bathrooms:   { type: Number, default: null },
   areaSqft:    { type: Number, required: true },
+  whatsappNumber: { type: String, trim: true, default: '' },
+  details:     { type: detailsSchema, default: () => ({}) },
   images:      [{ type: String }],
   amenities:   [{ type: String }],
   featured:    { type: Boolean, default: false },

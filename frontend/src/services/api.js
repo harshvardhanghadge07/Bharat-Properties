@@ -60,7 +60,7 @@ export const authApi = {
 }
 
 export const inquiryApi = {
-  create:  (d)  => api.post('/inquiries', d),
+  create:  (d)  => api.post('/inquiries', d, { timeout: 90000 }),
   getAll:  (p)  => api.get('/inquiries', { params: p }),
   markRead:(id) => api.put(`/inquiries/${id}/read`),
   delete:  (id) => api.delete(`/inquiries/${id}`),

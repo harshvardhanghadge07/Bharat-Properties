@@ -12,13 +12,17 @@ export const createInquiry = async (req, res, next) => {
       return res.status(400).json({ error: 'Name, email and message are required' })
     }
 
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || /[\r\n]/.test(email)) return res.status(400).json({ error: 'Enter a valid email address' })
+
     // Validate propertyId is a valid MongoDB ObjectId before querying
     if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId)) {
       return res.status(400).json({ error: 'Valid property ID is required' })
     }
 
-    const property = await Property.findById(propertyId)
+    const property = await Property.findById(propertyId).populate('owner', 'email')
     if (!property || !['ACTIVE', 'SOLD'].includes(property.status)) return res.status(404).json({ error: 'Property not found' })
+
+    if (!property.owner?.email) return res.status(409).json({ error: 'This listing has no contactable owner. Email inquiry is unavailable.' })
 
     const inquiry = await Inquiry.create({
       name, email, phone, message,
@@ -28,12 +32,10 @@ export const createInquiry = async (req, res, next) => {
 
     await inquiry.populate('property', 'title city')
 
-    // Send email — safely, won't crash server if email not configured
-    sendInquiryEmail(inquiry).catch(() => {
-      console.log('ℹ️  Email not sent — check EMAIL_USER and EMAIL_PASS in .env')
-    })
+    // Keep the saved inquiry even if providers fail; report delivery honestly.
+    const emailDelivered = await sendInquiryEmail(inquiry, property.owner.email).catch(() => false)
 
-    res.status(201).json({ message: 'Inquiry submitted successfully', inquiry })
+    res.status(201).json({ message: 'Inquiry submitted successfully', inquiry, emailDelivered })
   } catch (err) { next(err) }
 }
 

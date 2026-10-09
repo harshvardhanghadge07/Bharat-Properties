@@ -1,3 +1,4 @@
+import { getPropertyConfig, normalizePropertyType } from '../utils/propertyFields'
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -35,11 +36,11 @@ export default function Properties() {
     search:   params.get('search') || '',
     city:     params.get('city')   || '',
     state:    params.get('state')  || '',
-    type:     params.get('type')   || '',
+    type:     normalizePropertyType(params.get('type') || ''),
     status:   params.get('status') === 'SOLD' ? 'SOLD' : 'ACTIVE',
     minPrice: params.get('minPrice') || '',
     maxPrice: params.get('maxPrice') || '',
-    bedrooms: params.get('bedrooms') || '',
+    bedrooms: !params.get('type') || getPropertyConfig(params.get('type')).bedrooms ? params.get('bedrooms') || '' : '',
     featured: params.get('featured') || '',
     page:     parseInt(params.get('page') || '1'),
     sort:     params.get('sort') || 'createdAt',
@@ -57,6 +58,7 @@ export default function Properties() {
 
   const setFilters = (updates) => {
     const next = new URLSearchParams(params)
+    if (updates.type && !getPropertyConfig(updates.type).bedrooms) next.delete('bedrooms')
     Object.entries(updates).forEach(([key, val]) => {
       if (val) next.set(key, val)
       else next.delete(key)
@@ -204,7 +206,7 @@ export default function Properties() {
                   </div>
                 </div>
 
-                <div>
+                {(!filters.type || getPropertyConfig(filters.type).bedrooms) && <div>
                   <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Bedrooms</label>
                   <div className="flex gap-2">
                     {['1', '2', '3', '4+'].map((b) => {
@@ -223,7 +225,7 @@ export default function Properties() {
                       )
                     })}
                   </div>
-                </div>
+                </div>}
               </div>
             </motion.aside>
           )}

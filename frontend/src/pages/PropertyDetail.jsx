@@ -1,3 +1,4 @@
+import { normalizeWhatsApp, getPropertyConfig, DETAIL_FIELDS } from '../utils/propertyFields'
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -19,7 +20,7 @@ export default function PropertyDetail() {
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const [imgIdx, setImgIdx]     = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(null)
   const [form, setForm]         = useState({ name: '', email: '', phone: '', message: 'I am interested in this property. Please contact me.' })
 
   const { scrollY } = useScroll()
@@ -41,7 +42,7 @@ export default function PropertyDetail() {
 
   const inquiryMutation = useMutation({
     mutationFn: (data) => inquiryApi.create(data),
-    onSuccess: () => setSubmitted(true),
+    onSuccess: (result, variables) => setSubmitted({ ...result, propertyId: variables.propertyId }),
   })
 
   const handleSubmit = (e) => {
@@ -70,16 +71,12 @@ export default function PropertyDetail() {
 
   const images = property.images?.length ? property.images : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800']
 
-  // Try to get the owner's phone number, fallback to platform admin
-  let ownerPhone = property.owner?.phone ? property.owner.phone.replace(/\D/g, '') : ''
-  if (ownerPhone && ownerPhone.length === 10) ownerPhone = '91' + ownerPhone // Add country code if missing
-
-  const envPhone = (import.meta.env.VITE_WHATSAPP_NUMBER || '').replace(/\D/g, '')
-  const fallbackNumber = envPhone && envPhone !== '918484900257' ? envPhone : '919359854302'
-  const whatsappNumber = ownerPhone || fallbackNumber
+  const ownerPhone = normalizeWhatsApp(property.owner?.phone || '')
+  const whatsappNumber = normalizeWhatsApp(property.whatsappNumber || '')
+  const propertyConfig = getPropertyConfig(property.type)
 
   const whatsappMessage = encodeURIComponent(
-    `Hi, I'm interested in "${property.title}" (${property.location}, ${property.city}) listed at ${formatPrice(property.price)}. Is it still available?`
+    `Hi, I'm interested in "${property.title}" (${property.location}, ${property.city}) listed at ${formatPrice(property.price)}. Is it still available? ${window.location.origin}/properties/${id}`
   )
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
@@ -188,13 +185,13 @@ export default function PropertyDetail() {
 
               {/* Specs row */}
               <div className="flex flex-wrap gap-6 py-4 border-y border-gray-100 mb-5">
-                {property.bedrooms && (
+                {propertyConfig.bedrooms && property.bedrooms != null && (
                   <div className="flex items-center gap-2">
                     <BedDouble size={20} className="text-primary-500" />
                     <div><div className="font-semibold text-gray-900">{property.bedrooms}</div><div className="text-xs text-gray-400">Bedrooms</div></div>
                   </div>
                 )}
-                {property.bathrooms && (
+                {propertyConfig.bathrooms && property.bathrooms != null && (
                   <div className="flex items-center gap-2">
                     <Bath size={20} className="text-primary-500" />
                     <div><div className="font-semibold text-gray-900">{property.bathrooms}</div><div className="text-xs text-gray-400">Bathrooms</div></div>
@@ -202,10 +199,15 @@ export default function PropertyDetail() {
                 )}
                 <div className="flex items-center gap-2">
                   <Maximize2 size={20} className="text-primary-500" />
-                  <div><div className="font-semibold text-gray-900">{formatArea(property.areaSqft)}</div><div className="text-xs text-gray-400">Area</div></div>
+                  <div><div className="font-semibold text-gray-900">{formatArea(property.areaSqft)}</div><div className="text-xs text-gray-400">{propertyConfig.areaLabel.replace(' (sq.ft)', '')}</div></div>
                 </div>
               </div>
 
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                {propertyConfig.details.filter((key) => property.details?.[key] != null && property.details[key] !== '').map((key) => (
+                  <div key={key} className="rounded-lg bg-gray-50 p-3"><dt className="text-xs text-gray-500">{DETAIL_FIELDS[key].label}</dt><dd className="text-sm font-medium text-gray-800 mt-1">{property.details[key]}</dd></div>
+                ))}
+              </dl>
               <h2 className="font-semibold text-gray-900 mb-2">Description</h2>
               <p className="text-gray-600 text-sm leading-relaxed">{property.description}</p>
             </div>
@@ -271,15 +273,17 @@ export default function PropertyDetail() {
               </div>
             )}
             <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
-              <h3 className="font-bold text-gray-900 mb-4">Contact Agent</h3>
-              {submitted ? (
+              <h3 className="font-bold text-gray-900 mb-4">Contact Lister</h3>
+              {submitted?.propertyId === id ? (
                 <div className="text-center py-8">
                   <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
-                  <p className="font-semibold text-gray-900">Inquiry Sent!</p>
-                  <p className="text-sm text-gray-500 mt-1">Our agent will call you within 24 hours.</p>
+                  <p className="font-semibold text-gray-900">{submitted.emailDelivered ? 'Inquiry sent to the lister!' : 'Inquiry saved'}</p>
+                  <p className="text-sm text-gray-500 mt-1">{submitted.emailDelivered ? 'Your inquiry was emailed to the listing owner. They can reply directly to you.' : 'We could not email the lister right now. Please use their WhatsApp or phone contact if available.'}</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form id="lister-inquiry" onSubmit={handleSubmit} className="space-y-3">
+                  <p className="text-xs text-gray-500">Your message goes directly to the lister’s account email.</p>
+                  {inquiryMutation.isError && <p role="alert" className="text-sm text-red-600">{inquiryMutation.error?.error || 'Could not send your inquiry. Please try again.'}</p>}
                   <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
                     className="input-field" placeholder="Your Name" />
                   <input required type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})}
@@ -296,23 +300,21 @@ export default function PropertyDetail() {
               )}
 
               {/* WhatsApp inquiry */}
-              <a
+              {whatsappNumber ? <a
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-semibold py-3 rounded-xl transition-colors text-sm"
               >
                 <MessageCircle size={17} /> Chat on WhatsApp
-              </a>
+              </a> : <p className="mt-3 text-xs text-gray-500">The lister has not added a WhatsApp number.</p>}
 
               {/* Phone */}
               <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                <a href="tel:+919359854302" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
-                  <Phone size={15} className="text-primary-500" /> +919359854302
-                </a>
-                <a href="mailto:bharatestates3@gmail.com" className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
-                  <Mail size={15} className="text-primary-500" /> bharatestates3@gmail.com
-                </a>
+                {ownerPhone && <a href={`tel:+${ownerPhone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-500 transition-colors">
+                  <Phone size={15} className="text-primary-500" /> +{ownerPhone}
+                </a>}
+                <p className="flex items-center gap-2 text-xs text-gray-500"><Mail size={15} className="text-primary-500" /> Email inquiries use the lister’s login email.</p>
               </div>
             </div>
           </div>

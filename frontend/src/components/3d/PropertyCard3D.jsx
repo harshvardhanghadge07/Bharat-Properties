@@ -4,9 +4,11 @@ import { BedDouble, Bath, Maximize2, MapPin, Heart, ArrowUpRight } from 'lucide-
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
 import PropertyImage from '../ui/PropertyImage'
+import { getPropertyConfig } from '../../utils/propertyFields'
 
 export default function PropertyCard3D({ property, uniform = false, imageLoading = 'lazy' }) {
   const navigate = useNavigate()
+  const config = getPropertyConfig(property.type)
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const [favoriteError, setFavoriteError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -33,8 +35,8 @@ export default function PropertyCard3D({ property, uniform = false, imageLoading
         <Link to={`/properties/${property.id}`} className="estate-property-title"><h3>{property.title}</h3><ArrowUpRight size={19} /></Link>
         <p className="estate-property-price">{formatPrice(property.price)}</p>
         <div className="estate-property-specs">
-          {property.bedrooms > 0 && <span><BedDouble size={14} />{property.bedrooms} Beds</span>}
-          {property.bathrooms > 0 && <span><Bath size={14} />{property.bathrooms} Baths</span>}
+          {config.bedrooms && property.bedrooms > 0 && <span><BedDouble size={14} />{property.bedrooms} Beds</span>}
+          {config.bathrooms && property.bathrooms > 0 && <span><Bath size={14} />{property.bathrooms} Baths</span>}
           <span><Maximize2 size={13} />{formatArea(property.areaSqft)}</span>
         </div>
         {favoriteError && <p role="alert" className="mt-3 text-xs text-red-700">{favoriteError}</p>}

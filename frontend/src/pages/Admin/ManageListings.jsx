@@ -1,9 +1,12 @@
+import PropertyTypeFields from '../../components/ui/PropertyTypeFields'
+import ListingContactFields from '../../components/ui/ListingContactFields'
+import { propertyPayload, normalizePropertyType } from '../../utils/propertyFields'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Pencil, Trash2, X, Star, Loader2, ImagePlus } from 'lucide-react'
 import { propertyApi, uploadApi } from '../../services/api'
-import { formatPrice, PROPERTY_TYPES, TYPE_LABELS } from '../../utils/helpers'
+import { formatPrice, TYPE_LABELS } from '../../utils/helpers'
 import { ALL_STATES, getCitiesByState } from '../../utils/indiaData'
 import Skeleton from '../../components/ui/Skeleton'
 import AdminNav from '../../components/ui/AdminNav'
@@ -15,7 +18,7 @@ const ADMIN_PHOTO_LIMIT = 5
 const EMPTY = {
   title:'', description:'', price:'', type:'APARTMENT', status:'ACTIVE',
   location:'', city:'', state:'', pincode:'', bedrooms:'', bathrooms:'',
-  areaSqft:'', images:[], amenities:[], featured:false, lat: null, lng: null,
+  areaSqft:'', whatsappNumber:'', details:{}, images:[], amenities:[], featured:false, lat: null, lng: null,
 }
 
 export default function ManageListings() {
@@ -45,20 +48,14 @@ export default function ManageListings() {
   const openNew  = () => { setEditing(null); setForm(EMPTY); setModal(true) }
   const openEdit = (p) => {
     setEditing(p._id || p.id)
-    setForm({ ...p, images: p.images?.length ? p.images : [], price: String(p.price), areaSqft: String(p.areaSqft), bedrooms: String(p.bedrooms||''), bathrooms: String(p.bathrooms||'') })
+    setForm({ ...p, type: normalizePropertyType(p.type), details: p.details || {}, whatsappNumber: p.whatsappNumber || '', images: p.images?.length ? p.images : [], price: String(p.price), areaSqft: String(p.areaSqft), bedrooms: String(p.bedrooms ?? ''), bathrooms: String(p.bathrooms ?? '') })
     setModal(true)
   }
   const closeModal = () => { setModal(false); setEditing(null); setForm(EMPTY) }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const payload = {
-      ...form,
-      price: parseFloat(form.price),
-      areaSqft: parseFloat(form.areaSqft),
-      bedrooms: form.bedrooms ? parseInt(form.bedrooms) : null,
-      bathrooms: form.bathrooms ? parseInt(form.bathrooms) : null,
-    }
+    const payload = propertyPayload(form)
     if (editing) updateMut.mutate({ id: editing, ...payload })
     else createMut.mutate(payload)
   }
@@ -174,37 +171,18 @@ export default function ManageListings() {
                     <textarea {...inp('description')} required rows={3} className="input-field text-sm resize-none" placeholder="Property description..." />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Price (₹) *</label>
-                    <input {...inp('price')} type="number" required placeholder="5000000" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Area (sq.ft) *</label>
-                    <input {...inp('areaSqft')} type="number" required placeholder="1200" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Type *</label>
-                    <select {...inp('type')} required>
-                      {PROPERTY_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
-                    </select>
-                  </div>
-                  <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
                     <select {...inp('status')}>
                       {['ACTIVE','SOLD'].map((s) => <option key={s}>{s}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Bedrooms</label>
-                    <input {...inp('bedrooms')} type="number" placeholder="3" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Bathrooms</label>
-                    <input {...inp('bathrooms')} type="number" placeholder="2" />
-                  </div>
+
+                  <div className="col-span-2"><PropertyTypeFields form={form} setForm={setForm} /></div>
+                  <div className="col-span-2"><ListingContactFields form={form} setForm={setForm} /></div>
                   <div className="col-span-2">
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Location *</label>
                     <input {...inp('location')} required placeholder="Bandra West, Mumbai" />
-                    <div className="mt-3"><PropertyLocationPicker lat={form.lat ?? null} lng={form.lng ?? null} onChange={(point) => setForm((current) => ({ ...current, ...point }))} /></div>
+                    <div className="mt-3"><PropertyLocationPicker address={[form.location, form.city, form.state].filter(Boolean).join(', ')} lat={form.lat ?? null} lng={form.lng ?? null} onChange={(point) => setForm((current) => ({ ...current, ...point }))} /></div>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">City *</label>
@@ -293,6 +271,7 @@ export default function ManageListings() {
                     <label htmlFor="featured" className="text-sm text-gray-700 font-medium">Mark as Featured</label>
                   </div>
                 </div>
+                {(createMut.error || updateMut.error) && <p role="alert" className="text-sm text-red-600">{(createMut.error || updateMut.error).error || 'Could not save this listing.'}</p>}
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={closeModal} className="btn-outline flex-1 justify-center">Cancel</button>
                   <button type="submit" disabled={createMut.isPending || updateMut.isPending || uploading}

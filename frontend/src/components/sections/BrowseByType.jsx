@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { TYPE_LABELS } from '../../utils/helpers'
 import { Link } from 'react-router-dom'
 import { Building2, Home, MapPin, Briefcase, Crown, Trees, Users, Factory, Store, Warehouse, Hotel, Building } from 'lucide-react'
 
@@ -15,7 +16,6 @@ const TYPES = [
   { label: 'Shop / Showroom',  type: 'SHOP_SHOWROOM',    icon: Store,     color: 'bg-red-50 text-red-600',       border: 'hover:border-red-300' },
   { label: 'Warehouse',        type: 'WAREHOUSE',        icon: Warehouse, color: 'bg-stone-50 text-stone-600',   border: 'hover:border-stone-300' },
   { label: 'Hotel / Resort',   type: 'HOTEL_RESORT',     icon: Hotel,     color: 'bg-rose-50 text-rose-600',     border: 'hover:border-rose-300' },
-  { label: 'Bungalow',         type: 'BUNGALOW',         icon: Home,      color: 'bg-lime-50 text-lime-600',     border: 'hover:border-lime-300' },
 ]
 
 export default function BrowseByType() {
@@ -50,7 +50,7 @@ export default function BrowseByType() {
                     <Icon size={22} />
                   </div>
                   <span className="text-xs font-semibold text-gray-700 text-center leading-tight">
-                    {t.label}
+                    {TYPE_LABELS[t.type] || t.label}
                   </span>
                 </Link>
               </motion.div>

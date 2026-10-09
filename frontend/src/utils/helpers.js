@@ -22,13 +22,12 @@ export const PROPERTY_TYPES = [
   'SHOP_SHOWROOM',
   'WAREHOUSE',
   'HOTEL_RESORT',
-  'BUNGALOW',
 ]
 
 export const TYPE_LABELS = {
-  APARTMENT:       'Apartment',
-  VILLA:           'Villa',
-  PLOT:            'Plot',
+  APARTMENT:       'Flat / Apartment',
+  VILLA:           'Independent House / Villa / Bungalow',
+  PLOT:            'Plot / Land',
   COMMERCIAL:      'Commercial',
   PENTHOUSE:       'Penthouse',
   FARMHOUSE:       'Farmhouse',
@@ -38,7 +37,7 @@ export const TYPE_LABELS = {
   SHOP_SHOWROOM:   'Shop / Showroom',
   WAREHOUSE:       'Warehouse / Godown',
   HOTEL_RESORT:    'Hotel / Resort',
-  BUNGALOW:        'Bungalow',
+  BUNGALOW:        'Independent House / Villa / Bungalow',
 }
 
 export const TYPE_COLORS = {

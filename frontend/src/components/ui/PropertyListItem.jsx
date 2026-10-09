@@ -4,9 +4,11 @@ import { formatPrice, formatArea, TYPE_COLORS, TYPE_LABELS } from '../../utils/h
 import { useAuthStore } from '../../store/useAuthStore'
 import VerifiedBadge from './VerifiedBadge'
 import PropertyImage from './PropertyImage'
+import { getPropertyConfig } from '../../utils/propertyFields'
 
 export default function PropertyListItem({ property }) {
   const navigate = useNavigate()
+  const config = getPropertyConfig(property.type)
   const { isAuthenticated, isFavorite, toggleFavorite } = useAuthStore()
   const liked = isFavorite(property.id)
   const img = property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400'
@@ -40,8 +42,8 @@ export default function PropertyListItem({ property }) {
         </div>
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <div className="flex gap-4 text-xs text-gray-500">
-            {property.bedrooms && <span className="flex items-center gap-1"><BedDouble size={13} />{property.bedrooms} BHK</span>}
-            {property.bathrooms && <span className="flex items-center gap-1"><Bath size={13} />{property.bathrooms} Bath</span>}
+            {config.bedrooms && property.bedrooms > 0 && <span className="flex items-center gap-1"><BedDouble size={13} />{property.bedrooms} BHK</span>}
+            {config.bathrooms && property.bathrooms > 0 && <span className="flex items-center gap-1"><Bath size={13} />{property.bathrooms} Bath</span>}
             <span className="flex items-center gap-1"><Maximize2 size={13} />{formatArea(property.areaSqft)}</span>
           </div>
           <button onClick={handleLike} className="p-2 rounded-full hover:bg-red-50 transition-colors">

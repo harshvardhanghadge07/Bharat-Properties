@@ -2,6 +2,15 @@
 
 Same full-stack real estate portal, now powered by **MongoDB + Mongoose** instead of PostgreSQL.
 
+## Listing contacts, property fields, and map pins
+
+- Each listing has an optional WhatsApp number. Indian ten-digit numbers receive the +91 country code; other numbers should include their country code. An empty number hides WhatsApp contact. Existing listings need their owners to add this number when editing.
+- Email inquiries resolve the listing owner's current login email on the server, with the buyer's email as Reply-To. Configure the existing Brevo, Gmail, or Resend mail settings for delivery. Listings without an owner cannot receive email inquiries. Failed mail delivery is shown honestly while the inquiry remains saved.
+- Flat / Apartment, Independent House / Villa / Bungalow, and Plot / Land are merged choices. Legacy bungalow listings still appear when filtering houses / villas. Other types stay separate where their details differ. The owner and admin forms both show the relevant room, land, building, and utility fields.
+- For the embedded Google Maps picker, set `VITE_GOOGLE_MAPS_API_KEY` to a valid browser key with Maps JavaScript API and billing enabled, restrict the key to the site's HTTP referrers, and set `VITE_GOOGLE_MAPS_MAP_ID` to a JavaScript map ID. Rebuild the frontend after changing these variables. Google setup: https://developers.google.com/maps/documentation/javascript/advanced-markers/start
+- Without an available interactive map, users can open Google Maps, drop a pin, and paste its coordinates or a full place URL. Short share links and camera-centre URLs are not treated as exact property pins. Pins can be changed or removed; the address is kept separately.
+- Run the regression checks from the repository root: `node --test backend/src/controllers/*.test.js backend/src/services/*.test.js backend/src/utils/*.test.js frontend/src/utils/*.test.js`.
+
 ---
 
 ## 🌐 Live Deployment

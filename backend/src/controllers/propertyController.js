@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import Property from '../models/Property.js'
 import Inquiry from '../models/Inquiry.js'
+import { prepareListing, typeFilter } from '../utils/listingValidation.js'
 const PHOTO_LIMIT = 5
 const SALE_STATUSES = ['ACTIVE', 'SOLD']
 
@@ -21,7 +22,7 @@ const validateListing = (body) => {
 // Fields any listing owner may set from their own post/edit form
 const OWNER_EDITABLE_FIELDS = [
   'title', 'description', 'price', 'type', 'location', 'city', 'state',
-  'pincode', 'bedrooms', 'bathrooms', 'areaSqft', 'images', 'amenities', 'lat', 'lng',
+  'pincode', 'bedrooms', 'bathrooms', 'areaSqft', 'images', 'amenities', 'lat', 'lng', 'whatsappNumber', 'details',
 ]
 // Additional fields only an admin may set (curation/moderation controls —
 // matches what Admin/ManageListings.jsx's form actually sends).
@@ -58,7 +59,7 @@ export const getProperties = async (req, res, next) => {
     if (search) filter.$text = { $search: search }
     if (city)   filter.city  = { $regex: city, $options: 'i' }
     if (state)  filter.state = { $regex: state, $options: 'i' }
-    if (type)   filter.type  = type
+    if (type)   filter.type  = typeFilter(type)
     if (status) filter.status = status
     else        filter.status = 'ACTIVE'
     if (featured !== undefined) filter.featured = featured === 'true'
@@ -182,7 +183,7 @@ export const createProperty = async (req, res, next) => {
       })
     }
 
-    const property = await Property.create({ ...pickEditableFields(req.body, req.user), owner: req.user._id })
+    const property = await Property.create({ ...prepareListing(pickEditableFields(req.body, req.user)), owner: req.user._id })
 
     res.status(201).json(property)
   } catch (err) { next(err) }
@@ -214,7 +215,7 @@ export const updateProperty = async (req, res, next) => {
       }
     }
 
-    Object.assign(property, pickEditableFields(req.body, req.user))
+    Object.assign(property, prepareListing(pickEditableFields(req.body, req.user), property))
     await property.save()
     res.json(property)
   } catch (err) { next(err) }
