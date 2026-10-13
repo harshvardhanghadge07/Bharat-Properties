@@ -22,9 +22,15 @@ export const PROPERTY_TYPES = [
   'SHOP_SHOWROOM',
   'WAREHOUSE',
   'HOTEL_RESORT',
+  'OFFICE_SPACE',
+  'COMMERCIAL_BUILDING',
+  'AGRICULTURAL_LAND',
 ]
 
 export const TYPE_LABELS = {
+  OFFICE_SPACE: 'Office Space',
+  COMMERCIAL_BUILDING: 'Commercial Building',
+  AGRICULTURAL_LAND: 'Agricultural Land',
   APARTMENT:       'Flat / Apartment',
   VILLA:           'Independent House / Villa / Bungalow',
   PLOT:            'Plot / Land',
@@ -41,6 +47,9 @@ export const TYPE_LABELS = {
 }
 
 export const TYPE_COLORS = {
+  OFFICE_SPACE: 'bg-sky-100 text-sky-700',
+  COMMERCIAL_BUILDING: 'bg-amber-100 text-amber-700',
+  AGRICULTURAL_LAND: 'bg-emerald-100 text-emerald-700',
   APARTMENT:       'bg-blue-100 text-blue-700',
   VILLA:           'bg-purple-100 text-purple-700',
   PLOT:            'bg-green-100 text-green-700',

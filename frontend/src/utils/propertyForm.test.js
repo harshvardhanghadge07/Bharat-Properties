@@ -30,3 +30,24 @@ test('every property type shows one required positive price input and retains pr
     assert.equal(prices[0].props.value, '5000000', type)
   }
 })
+
+test('agricultural area units preserve the physical land area when switched', () => {
+  let form = { type: 'AGRICULTURAL_LAND', price: '5000000', details: { landArea: '2', landAreaUnit: 'Acres' } }
+  const render = () => descendants(PropertyTypeFields({ form, setForm: (update) => { form = update(form) } }))
+  assert.equal(render().filter((node) => node.type === 'input' && node.props.name === 'areaSqft').length, 0)
+  assert.equal(render().find((node) => node.type === 'input' && node.props.name === 'landArea').props.required, true)
+  render().find((node) => node.type === 'select' && node.props.name === 'landAreaUnit').props.onChange({ target: { value: 'Guntha' } })
+  assert.equal(form.details.landArea, 80)
+  render().find((node) => node.type === 'select' && node.props.name === 'landAreaUnit').props.onChange({ target: { value: 'Acres' } })
+  assert.equal(form.details.landArea, 2)
+  assert.equal(form.price, '5000000')
+})
+
+test('PDF-only fields appear for their relevant types and identifiers remain text', () => {
+  const fields = (type) => descendants(PropertyTypeFields({ form: { type, details: {} }, setForm: () => {} })).filter((node) => ['input', 'select'].includes(node.type))
+  for (const [type, names] of Object.entries({ APARTMENT: ['carpetAreaSqft'], ROW_HOUSE: ['naStatus'], PLOT: ['plotType', 'naStatus'], SHOP_SHOWROOM: ['carpetAreaSqft', 'builtUpAreaSqft', 'floorLevel', 'liftAvailability'], OFFICE_SPACE: ['carpetAreaSqft', 'floorNumber', 'totalFloors', 'parkingSpaces', 'liftAvailability'], COMMERCIAL_BUILDING: ['plotAreaSqft', 'totalFloors', 'parkingSpaces', 'liftAvailability'] })) {
+    for (const name of names) assert.ok(fields(type).some((node) => node.props.name === name), `${type}: ${name}`)
+  }
+  assert.equal(fields('AGRICULTURAL_LAND').find((node) => node.props.name === 'surveyNumber').props.type, 'text')
+  assert.equal(fields('FARMHOUSE').some((node) => node.props.name === 'surveyNumber'), false)
+})

@@ -1,6 +1,6 @@
 const invalid = (message) => Object.assign(new Error(message), { status: 400 })
 
-import { PROPERTY_RULES, DETAIL_RULES } from './propertyRules.js'
+import { PROPERTY_RULES, DETAIL_RULES, LAND_AREA_UNITS } from './propertyRules.js'
 
 export const normalizePropertyType = (type) => ({ BUNGALOW: 'VILLA', FLAT: 'APARTMENT', INDEPENDENT_HOUSE: 'VILLA', LAND: 'PLOT' }[type] || type)
 export const typeFilter = (type) => {
@@ -51,9 +51,18 @@ export const prepareListing = (fields, existing = {}) => {
       const rule = DETAIL_RULES[key]
       if (rule.type === 'number') {
         if (typeof value !== 'number' || !Number.isFinite(value) || value < rule.min || (rule.step === '1' && !Number.isInteger(value))) throw invalid(`Enter a valid ${rule.label.toLowerCase()}.`)
+      } else if (rule.type === 'text') {
+        if (typeof value !== 'string' || value.trim().length > rule.maxLength) throw invalid(`Enter a valid ${rule.label.toLowerCase()} (up to ${rule.maxLength} characters).`)
       } else if (!rule.options.includes(value)) throw invalid(`Choose a valid ${rule.label.toLowerCase()}.`)
-      data.details[key] = value
+      data.details[key] = rule.type === 'text' ? value.trim() : value
     }
+  }
+  if (config?.areaUnits && ('details' in data || 'type' in data || 'areaSqft' in data)) {
+    const details = data.details || existing.details || {}
+    if (!Number.isFinite(details.landArea) || details.landArea <= 0 || !Object.hasOwn(LAND_AREA_UNITS, details.landAreaUnit)) throw invalid('Enter the agricultural land area and choose Acres, Hectares or Guntha.')
+    // Store a canonical square-foot area for price comparisons; keep the selected unit for editing.
+    data.areaSqft = details.landArea * LAND_AREA_UNITS[details.landAreaUnit]
+    if (!Number.isFinite(data.areaSqft)) throw invalid('Enter a valid land area.')
   }
   return data
 }

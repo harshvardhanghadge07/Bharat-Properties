@@ -1,13 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { prepareListing, typeFilter, normalizeWhatsApp } from './listingValidation.js'
-import { PROPERTY_RULES, DETAIL_RULES } from './propertyRules.js'
-import { PROPERTY_CONFIG, DETAIL_FIELDS, propertyPayload, normalizeWhatsApp as frontendWhatsApp } from '../../../frontend/src/utils/propertyFields.js'
+import { PROPERTY_RULES, DETAIL_RULES, LAND_AREA_UNITS } from './propertyRules.js'
+import { PROPERTY_CONFIG, DETAIL_FIELDS, LAND_AREA_UNITS as FRONTEND_UNITS, propertyPayload, normalizeWhatsApp as frontendWhatsApp } from '../../../frontend/src/utils/propertyFields.js'
 import Property from '../models/Property.js'
 
 test('frontend and backend agree on fields for every property type', () => {
   assert.deepEqual(PROPERTY_RULES, PROPERTY_CONFIG)
   assert.deepEqual(DETAIL_RULES, DETAIL_FIELDS)
+  assert.deepEqual(LAND_AREA_UNITS, FRONTEND_UNITS)
 })
 
 test('changing a home into a plot removes room counts and unrelated details', () => {
@@ -53,7 +54,7 @@ test('WhatsApp numbers normalize consistently without platform fallbacks', () =>
 
 test('form payloads preserve zero values and round-trip type-specific details through storage', async () => {
   for (const type of Object.keys(PROPERTY_CONFIG)) {
-    const payload = propertyPayload({ type, title: 'Listing', description: 'Test', price: '100000', areaSqft: '1000', bedrooms: '0', bathrooms: '1', location: 'Locality', city: 'Mumbai', state: 'Maharashtra', whatsappNumber: '+91 98765 43210', details: { floorNumber: '0', builtUpAreaSqft: '500', roomCount: '10', roadWidthFt: '20' } })
+    const payload = propertyPayload({ type, title: 'Listing', description: 'Test', price: '100000', areaSqft: '1000', bedrooms: '0', bathrooms: '1', location: 'Locality', city: 'Mumbai', state: 'Maharashtra', whatsappNumber: '+91 98765 43210', details: { floorNumber: '0', builtUpAreaSqft: '500', roomCount: '10', roadWidthFt: '20', landArea: '2', landAreaUnit: 'Acres' } })
     const prepared = prepareListing(payload)
     const property = new Property(prepared)
     await property.validate()
@@ -63,4 +64,36 @@ test('form payloads preserve zero values and round-trip type-specific details th
     if (PROPERTY_CONFIG[type].bedrooms) assert.equal(property.bedrooms, 0)
     else assert.equal(property.bedrooms, null)
   }
+})
+
+test('agricultural land retains selected units and the server computes its canonical area', async () => {
+  for (const [unit, factor] of Object.entries(LAND_AREA_UNITS)) {
+    const form = { type: 'AGRICULTURAL_LAND', price: '100000', areaSqft: '', details: { landArea: '2', landAreaUnit: unit, village: 'Khed', taluka: 'Khed', district: 'Pune', surveyNumber: '0012/3-A', roadFrontageFt: '25', roadAccess: 'Direct public road', landUse: 'Agricultural' } }
+    const payload = propertyPayload(form)
+    assert.equal(payload.areaSqft, 2 * factor)
+    const prepared = prepareListing({ ...payload, areaSqft: 999 })
+    assert.equal(prepared.areaSqft, 2 * factor)
+    assert.equal(prepared.details.surveyNumber, '0012/3-A')
+    const saved = new Property({ ...prepared, title: 'Land', description: 'Test', location: 'Village road', city: 'Pune', state: 'Maharashtra' })
+    await saved.validate()
+    const edited = propertyPayload({ ...saved.toObject(), price: '200000' })
+    assert.equal(edited.areaSqft, prepared.areaSqft)
+    assert.deepEqual(edited.details, prepared.details)
+  }
+})
+
+test('agricultural input rejects missing units, invalid land area and malformed text', () => {
+  for (const details of [{ landArea: 2 }, { landArea: 2, landAreaUnit: 'invalid' }, { landArea: -1, landAreaUnit: 'Acres' }, { landArea: 2, landAreaUnit: 'Acres', village: {} }, { landArea: 2, landAreaUnit: 'Acres', surveyNumber: 'x'.repeat(121) }]) {
+    assert.throws(() => prepareListing({ type: 'AGRICULTURAL_LAND', details }))
+  }
+})
+
+test('PDF additions persist for existing property types without requiring them on older listings', () => {
+  const apartment = prepareListing({ details: { carpetAreaSqft: 800 } }, { type: 'APARTMENT' })
+  assert.equal(apartment.details.carpetAreaSqft, 800)
+  const rowHouse = prepareListing({ details: { naStatus: 'Approved' } }, { type: 'ROW_HOUSE' })
+  assert.equal(rowHouse.details.naStatus, 'Approved')
+  const shop = prepareListing({ details: { floorLevel: 'Basement', liftAvailability: 'Available' } }, { type: 'SHOP_SHOWROOM' })
+  assert.equal(shop.details.floorLevel, 'Basement')
+  assert.doesNotThrow(() => prepareListing({ title: 'Updated' }, { type: 'ROW_HOUSE' }))
 })

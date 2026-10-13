@@ -1,13 +1,13 @@
 import mongoose from 'mongoose'
-import { DETAIL_RULES } from '../utils/propertyRules.js'
+import { DETAIL_RULES, PROPERTY_RULES } from '../utils/propertyRules.js'
 
-const detailsSchema = new mongoose.Schema(Object.fromEntries(Object.entries(DETAIL_RULES).map(([key, rule]) => [key, rule.type === 'number' ? { type: Number, min: rule.min } : { type: String, enum: rule.options }])), { _id: false })
+const detailsSchema = new mongoose.Schema(Object.fromEntries(Object.entries(DETAIL_RULES).map(([key, rule]) => [key, rule.type === 'number' ? { type: Number, min: rule.min } : rule.type === 'text' ? { type: String, trim: true, maxlength: rule.maxLength } : { type: String, enum: rule.options }])), { _id: false })
 
 const propertySchema = new mongoose.Schema({
   title:       { type: String, required: true, trim: true },
   description: { type: String, required: true },
   price:       { type: Number, required: true },
-  type:        { type: String, required: true, enum: ['APARTMENT','VILLA','PLOT','COMMERCIAL','PENTHOUSE','FARMHOUSE','PG_HOSTEL','ROW_HOUSE','INDUSTRIAL_LAND','SHOP_SHOWROOM','WAREHOUSE','HOTEL_RESORT','BUNGALOW'] },
+  type:        { type: String, required: true, enum: [...Object.keys(PROPERTY_RULES), 'BUNGALOW'] },
   // Keep the legacy value readable for owners; API writes only allow ACTIVE/SOLD.
   status:      { type: String, enum: ['ACTIVE','SOLD','RENTED'], default: 'ACTIVE' },
 

@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom'
 import { Building2, Home, MapPin, Briefcase, Crown, Trees, Users, Factory, Store, Warehouse, Hotel, Building } from 'lucide-react'
 
 const TYPES = [
+  { label: 'Office Space', type: 'OFFICE_SPACE', icon: Briefcase, color: 'bg-sky-50 text-sky-600', border: 'hover:border-sky-300' },
+  { label: 'Commercial Building', type: 'COMMERCIAL_BUILDING', icon: Building, color: 'bg-amber-50 text-amber-600', border: 'hover:border-amber-300' },
+  { label: 'Agricultural Land', type: 'AGRICULTURAL_LAND', icon: Trees, color: 'bg-emerald-50 text-emerald-600', border: 'hover:border-emerald-300' },
   { label: 'Apartment',        type: 'APARTMENT',       icon: Building2, color: 'bg-blue-50 text-blue-600',    border: 'hover:border-blue-300' },
   { label: 'Villa',            type: 'VILLA',            icon: Home,      color: 'bg-purple-50 text-purple-600', border: 'hover:border-purple-300' },
   { label: 'Plot',             type: 'PLOT',             icon: MapPin,    color: 'bg-green-50 text-green-600',   border: 'hover:border-green-300' },
