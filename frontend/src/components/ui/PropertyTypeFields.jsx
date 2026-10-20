@@ -11,6 +11,7 @@ export default function PropertyTypeFields({ form, setForm }) {
         const type = event.target.value
         setForm((old) => ({ ...old, type, bedrooms: '', bathrooms: '', details: {} }))
       }}>
+        {form.type && !PROPERTY_TYPES.includes(form.type) && <option value={form.type} disabled>{TYPE_LABELS[form.type] || form.type} (existing listing)</option>}
         {PROPERTY_TYPES.map((type) => <option key={type} value={type}>{TYPE_LABELS[type]}</option>)}
       </select>
     </label>

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { TYPE_LABELS } from '../../utils/helpers'
 import { Link } from 'react-router-dom'
-import { Building2, Home, MapPin, Briefcase, Crown, Trees, Users, Factory, Store, Warehouse, Hotel, Building } from 'lucide-react'
+import { Building2, Home, MapPin, Briefcase, Trees, Users, Store, Warehouse, Hotel, Building } from 'lucide-react'
 
 const TYPES = [
   { label: 'Office Space', type: 'OFFICE_SPACE', icon: Briefcase, color: 'bg-sky-50 text-sky-600', border: 'hover:border-sky-300' },
@@ -10,12 +10,8 @@ const TYPES = [
   { label: 'Apartment',        type: 'APARTMENT',       icon: Building2, color: 'bg-blue-50 text-blue-600',    border: 'hover:border-blue-300' },
   { label: 'Villa',            type: 'VILLA',            icon: Home,      color: 'bg-purple-50 text-purple-600', border: 'hover:border-purple-300' },
   { label: 'Plot',             type: 'PLOT',             icon: MapPin,    color: 'bg-green-50 text-green-600',   border: 'hover:border-green-300' },
-  { label: 'Commercial',       type: 'COMMERCIAL',       icon: Briefcase, color: 'bg-yellow-50 text-yellow-600', border: 'hover:border-yellow-300' },
-  { label: 'Penthouse',        type: 'PENTHOUSE',        icon: Crown,     color: 'bg-pink-50 text-pink-600',     border: 'hover:border-pink-300' },
-  { label: 'Farmhouse',        type: 'FARMHOUSE',        icon: Trees,     color: 'bg-teal-50 text-teal-600',     border: 'hover:border-teal-300' },
   { label: 'PG / Hostel',      type: 'PG_HOSTEL',        icon: Users,     color: 'bg-orange-50 text-orange-600', border: 'hover:border-orange-300' },
   { label: 'Row House',        type: 'ROW_HOUSE',        icon: Building,  color: 'bg-indigo-50 text-indigo-600', border: 'hover:border-indigo-300' },
-  { label: 'Industrial Land',  type: 'INDUSTRIAL_LAND',  icon: Factory,   color: 'bg-gray-50 text-gray-600',     border: 'hover:border-gray-300' },
   { label: 'Shop / Showroom',  type: 'SHOP_SHOWROOM',    icon: Store,     color: 'bg-red-50 text-red-600',       border: 'hover:border-red-300' },
   { label: 'Warehouse',        type: 'WAREHOUSE',        icon: Warehouse, color: 'bg-stone-50 text-stone-600',   border: 'hover:border-stone-300' },
   { label: 'Hotel / Resort',   type: 'HOTEL_RESORT',     icon: Hotel,     color: 'bg-rose-50 text-rose-600',     border: 'hover:border-rose-300' },

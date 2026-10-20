@@ -4,7 +4,7 @@ export const PROPERTY_RULES = {
   VILLA: {"areaLabel":"Built-up area (sq.ft)","bedrooms":true,"bathrooms":true,"roomsRequired":true,"details":["plotAreaSqft","totalFloors","furnishing","parkingSpaces","facing"]},
   ROW_HOUSE: {"areaLabel":"Built-up area (sq.ft)","bedrooms":true,"bathrooms":true,"roomsRequired":true,"details":["plotAreaSqft","totalFloors","furnishing","parkingSpaces","facing","naStatus"]},
   PENTHOUSE: {"areaLabel":"Built-up area (sq.ft)","bedrooms":true,"bathrooms":true,"roomsRequired":true,"details":["floorNumber","totalFloors","furnishing","parkingSpaces","facing"]},
-  PLOT: {"areaLabel":"Plot / land area (sq.ft)","details":["plotLengthFt","plotWidthFt","roadWidthFt","landUse","facing","boundaryWall","waterSupply","electricity","plotType","naStatus"]},
+  PLOT: {"areaLabel":"Plot area (sq.ft)","details":["plotLengthFt","plotWidthFt","roadWidthFt","landUse","facing","boundaryWall","waterSupply","electricity","plotType","naStatus"]},
   INDUSTRIAL_LAND: {"areaLabel":"Land area (sq.ft)","details":["plotLengthFt","plotWidthFt","roadWidthFt","boundaryWall","waterSupply","electricity"]},
   FARMHOUSE: {"areaLabel":"Total land area (sq.ft)","bedrooms":true,"bathrooms":true,"hint":"Enter the total land area above. Add the house area and rooms only if a house is built on the land.","details":["builtUpAreaSqft","roadWidthFt","boundaryWall","waterSupply","electricity","parkingSpaces"]},
   COMMERCIAL: {"areaLabel":"Built-up area (sq.ft)","bathrooms":true,"details":["floorNumber","totalFloors","furnishing","parkingSpaces"]},

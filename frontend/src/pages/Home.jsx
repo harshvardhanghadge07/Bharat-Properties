@@ -7,8 +7,8 @@ import CTABanner from '../components/sections/CTABanner'
 const collections = [
   { label: 'Flats / Apartments', description: 'A life above the everyday', type: 'APARTMENT', Icon: Building2 },
   { label: 'Houses / Villas', description: 'Room to make it your own', type: 'VILLA', Icon: HomeIcon },
-  { label: 'Plots & land', description: 'Build your next beginning', type: 'PLOT', Icon: Trees },
-  { label: 'Commercial', description: 'Space for your ambition', type: 'COMMERCIAL', Icon: Store },
+  { label: 'Plot', description: 'Build your next beginning', type: 'PLOT', Icon: Trees },
+  { label: 'Commercial Building', description: 'Space for your ambition', type: 'COMMERCIAL_BUILDING', Icon: Store },
 ]
 
 export default function Home() {
