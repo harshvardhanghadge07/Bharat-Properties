@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
-  timeout: 10000,
+  timeout: 30000,
 })
 
 api.interceptors.request.use((config) => {
@@ -27,7 +27,18 @@ const normalize = (data) => {
 
 api.interceptors.response.use(
   (res) => normalize(res.data),
-  (err) => Promise.reject(err.response?.data || err)
+  (err) => {
+    const errorData = err.response?.data
+    if (errorData && typeof errorData === 'object' && errorData.error) {
+      return Promise.reject(errorData)
+    }
+    const message =
+      (errorData && typeof errorData === 'object' && errorData.message) ||
+      (typeof errorData === 'string' && errorData) ||
+      err.message ||
+      'Something went wrong. Please try again.'
+    return Promise.reject({ error: message, ...(typeof errorData === 'object' ? errorData : {}) })
+  }
 )
 
 export const propertyApi = {
