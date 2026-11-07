@@ -19,6 +19,10 @@ services:
       # CLOUDINARY_CLOUD_NAME
       # CLOUDINARY_API_KEY
       # CLOUDINARY_API_SECRET
+      # BREVO_API_KEY       ← Brevo Dashboard → Settings → API Keys (xkeysib-...)
+      # BREVO_FROM          ← e.g. "Bharat Properties <noreply@yourdomain.com>"
+      # RESEND_API_KEY      ← fallback, resend.com
+      # RESEND_FROM         ← must be a verified sender domain on resend.com
       # EMAIL_HOST
       # EMAIL_PORT
       # EMAIL_USER

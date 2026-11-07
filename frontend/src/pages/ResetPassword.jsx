@@ -1,14 +1,17 @@
-import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { Building2, Eye, EyeOff, CheckCircle2, KeyRound } from 'lucide-react'
 import { authApi } from '../services/api'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function ResetPassword() {
-  const { token } = useParams()
+  const { token: paramToken } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
+  const detectedToken = (paramToken || searchParams.get('token') || searchParams.get('code') || '').trim()
+  const [token, setToken]         = useState(detectedToken)
   const [password, setPassword]   = useState('')
   const [confirm, setConfirm]     = useState('')
   const [showPw, setShowPw]       = useState(false)
@@ -16,10 +19,19 @@ export default function ResetPassword() {
   const [loading, setLoading]     = useState(false)
   const [success, setSuccess]     = useState(false)
 
+  useEffect(() => {
+    if (detectedToken && !token) setToken(detectedToken)
+  }, [detectedToken])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
+    const cleanToken = token.trim()
+    if (!cleanToken) {
+      setError('Reset code is required. Please paste the code from your email.')
+      return
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters')
       return
@@ -31,7 +43,7 @@ export default function ResetPassword() {
 
     setLoading(true)
     try {
-      const { user, token: jwtToken } = await authApi.resetPassword({ token, password })
+      const { user, token: jwtToken } = await authApi.resetPassword({ token: cleanToken, password })
 
       // Log the user in immediately with their new password
       localStorage.setItem('bp_token', jwtToken)
@@ -40,7 +52,7 @@ export default function ResetPassword() {
       setSuccess(true)
       setTimeout(() => navigate(user.role === 'ADMIN' ? '/admin' : '/'), 1800)
     } catch (err) {
-      setError(err.error || 'This reset link is invalid or has expired.')
+      setError(err.error || 'This reset link or code is invalid or has expired.')
     } finally {
       setLoading(false)
     }
@@ -71,6 +83,24 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">{error}</div>}
+
+            {!paramToken && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reset Code</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
+                    className="input-field pl-10 font-mono text-xs"
+                    placeholder="Paste the reset code from your email"
+                  />
+                  <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Copy and paste the code from your password reset email.</p>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>

@@ -8,7 +8,7 @@ import { isDisposableDomain, domainCanReceiveMail } from '../utils/emailCheck.js
 const signToken = (userId) =>
   jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' })
 
-const RESET_TOKEN_EXPIRY_MINUTES = 30
+const RESET_TOKEN_EXPIRY_MINUTES = 60
 const VERIFY_TOKEN_EXPIRY_HOURS = 24
 
 // Format validation (regex, in the User schema) only catches typos like
@@ -28,7 +28,8 @@ const checkEmailIsReal = async (email) => {
 
 // Generates a verification token for a user, saves its hash, and emails the link.
 // Fire-and-forget on the email send so a flaky SMTP server never blocks signup/login.
-const issueEmailVerification = (user) => {
+// `origin` is the caller's request origin so the link points at the right frontend host.
+const issueEmailVerification = (user, origin) => {
   if (!user.email) return
 
   const rawToken = crypto.randomBytes(32).toString('hex')
@@ -37,7 +38,7 @@ const issueEmailVerification = (user) => {
   user.emailVerificationToken = hashedToken
   user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
 
-  const clientUrl = req.headers.origin || (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173')
+  const clientUrl = origin || (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173')
   const verifyUrl = `${clientUrl}/verify-email/${rawToken}`
 
   sendVerificationEmail(user, verifyUrl).catch((err) =>
@@ -187,7 +188,7 @@ export const resendVerification = async (req, res, next) => {
     }
     if (user.emailVerified) return res.json({ message: 'Your email is already verified — you can log in.' })
 
-    issueEmailVerification(user)
+    issueEmailVerification(user, req.headers.origin)
     await user.save({ validateBeforeSave: false })
 
     res.json({ message: 'Verification email sent. Please check your inbox.' })
@@ -217,11 +218,20 @@ export const forgotPassword = async (req, res, next) => {
     const clientUrl = req.headers.origin || (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173')
     const resetUrl = `${clientUrl}/reset-password/${rawToken}`
 
-    // Fire-and-forget — respond immediately so a slow/blocked SMTP on cloud
-    // hosts (e.g. Render blocking port 587) never causes the request to timeout.
-    sendResetPasswordEmail(user, resetUrl).catch((err) =>
-      console.error('Failed to send password reset email:', err.message)
-    )
+    // Await delivery so we can report failure. sendResetPasswordEmail returns
+    // false when all providers fail (never throws), so this doesn't time out.
+    const delivered = await sendResetPasswordEmail(user, resetUrl)
+
+    if (!delivered) {
+      // Roll back the token so the next attempt generates a fresh one
+      user.resetPasswordToken = null
+      user.resetPasswordExpires = null
+      await user.save({ validateBeforeSave: false })
+
+      return res.status(503).json({
+        error: 'We could not send the reset email right now due to a mail delivery issue. Please try again in a few minutes or contact support.',
+      })
+    }
 
     res.json({ message: 'If an account exists for that email, a reset link has been sent.' })
   } catch (err) { next(err) }
@@ -250,7 +260,8 @@ export const resetPassword = async (req, res, next) => {
     if (!token || !password) return res.status(400).json({ error: 'Token and new password are required' })
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' })
 
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+    // Trim the token to guard against trailing newlines/spaces in copied links
+    const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex')
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
@@ -264,7 +275,7 @@ export const resetPassword = async (req, res, next) => {
     user.password = password
     user.resetPasswordToken = null
     user.resetPasswordExpires = null
-    await user.save()
+    await user.save({ validateBeforeSave: false })
 
     // Log the user straight in after a successful reset
     const jwtToken = signToken(user._id)
