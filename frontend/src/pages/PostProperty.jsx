@@ -228,7 +228,7 @@ export default function PostProperty() {
             </div>
           </div>
 
-          <PropertyLocationPicker address={[form.location, form.city, form.state].filter(Boolean).join(', ')} lat={form.lat} lng={form.lng} onChange={(point) => setForm((current) => ({ ...current, ...point }))} />
+          <PropertyLocationPicker address={[form.location, form.city, form.state, form.pincode].filter(Boolean).join(', ')} lat={form.lat} lng={form.lng} onChange={(point) => setForm((current) => ({ ...current, ...point }))} />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { LocateFixed, MapPin, Check, AlertCircle } from 'lucide-react'
+import { LocateFixed, MapPin, Check, AlertCircle, Sparkles } from 'lucide-react'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 
@@ -68,6 +68,39 @@ const isValidCoord = (lat, lng) =>
   Number.isFinite(Number(lng)) &&
   Math.abs(Number(lng)) <= 180
 
+// Progressive geocoding helper for Indian addresses
+async function geocodeAddress(addrStr) {
+  if (!addrStr || addrStr.trim().length < 3) return null
+
+  const rawParts = addrStr.split(',').map((s) => s.trim()).filter(Boolean)
+  const queries = [rawParts.join(', ')]
+
+  if (rawParts.length > 2) queries.push(rawParts.slice(1).join(', '))
+  if (rawParts.length > 3) queries.push(rawParts.slice(2).join(', '))
+  if (rawParts.length >= 2) queries.push(`${rawParts[0]}, ${rawParts[1]}`)
+
+  for (const query of queries) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=1`
+      const res = await fetch(url, {
+        headers: { 'Accept-Language': 'en' },
+      })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data && data[0] && data[0].lat && data[0].lon) {
+        return {
+          lat: Number(parseFloat(data[0].lat).toFixed(6)),
+          lng: Number(parseFloat(data[0].lon).toFixed(6)),
+          displayName: data[0].display_name,
+        }
+      }
+    } catch {
+      // try next query
+    }
+  }
+  return null
+}
+
 export default function PropertyLocationPicker({ lat, lng, onChange, address = '' }) {
   const panelId = useId()
   const hasPoint = isValidCoord(lat, lng)
@@ -77,34 +110,67 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
   const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 }) // Default India center
   const [mapZoom, setMapZoom] = useState(5)
   const [locating, setLocating] = useState(false)
+  const [geocoding, setGeocoding] = useState(false)
+  const [detectedAddressName, setDetectedAddressName] = useState('')
   const [error, setError] = useState('')
 
+  const lastGeocodedRef = useRef('')
   const requestId = useRef(0)
   useEffect(() => () => { requestId.current += 1 }, [])
 
-  // Geocode address when opening if no pin is set yet to bring map near locality/city
-  useEffect(() => {
-    if (open && !point && address && address.trim().length > 3) {
-      const controller = new AbortController()
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
-        signal: controller.signal,
-        headers: { 'Accept-Language': 'en' },
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data && data[0]) {
-            const geocoded = {
-              lat: Number(parseFloat(data[0].lat).toFixed(6)),
-              lng: Number(parseFloat(data[0].lon).toFixed(6)),
-            }
-            setMapCenter(geocoded)
-            setMapZoom(14)
-          }
-        })
-        .catch(() => {})
-      return () => controller.abort()
+  // Geocode address and set map location
+  const detectFromAddress = async (silent = false) => {
+    const cleanAddr = (address || '').trim()
+    if (!cleanAddr || cleanAddr.length < 3) {
+      if (!silent) setError('Please enter an Address, City or Locality above first.')
+      return
     }
-  }, [open, address, point])
+
+    setGeocoding(true)
+    if (!silent) setError('')
+    try {
+      const result = await geocodeAddress(cleanAddr)
+      if (result) {
+        const newPoint = { lat: result.lat, lng: result.lng }
+        setPoint(newPoint)
+        setMapCenter(newPoint)
+        setMapZoom(16)
+        const shortName = result.displayName.split(',').slice(0, 3).join(', ')
+        setDetectedAddressName(shortName)
+        onChange(newPoint)
+        lastGeocodedRef.current = cleanAddr
+      } else {
+        if (!silent) {
+          setError(`Could not automatically pinpoint "${cleanAddr}". You can choose it directly on the map.`)
+        }
+      }
+    } catch {
+      if (!silent) {
+        setError('Unable to detect location automatically. Please choose on the map.')
+      }
+    } finally {
+      setGeocoding(false)
+    }
+  }
+
+  // Automatically detect location when user finishes entering address (debounced)
+  useEffect(() => {
+    const clean = (address || '').trim()
+    if (!clean || clean.length < 3) return
+    if (clean === lastGeocodedRef.current) return
+
+    // If an initial point already exists from database, sync ref and skip first overwrite
+    if (hasPoint && !lastGeocodedRef.current) {
+      lastGeocodedRef.current = clean
+      return
+    }
+
+    const timer = setTimeout(() => {
+      detectFromAddress(true)
+    }, 900)
+
+    return () => clearTimeout(timer)
+  }, [address])
 
   const select = (value) => {
     setPoint(value)
@@ -157,6 +223,8 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
     if (saved) {
       setMapCenter(saved)
       setMapZoom(16)
+    } else if (address && address.trim().length >= 3) {
+      detectFromAddress(true)
     }
     setError('')
     setOpen(true)
@@ -168,7 +236,7 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
         <div>
           <p className="text-sm font-medium text-gray-800">Property Location</p>
           <p className="text-xs text-gray-500 mt-0.5">
-            Choose your location on the map or use your current location.
+            Auto-detected from address, or choose on map / use current location.
           </p>
         </div>
 
@@ -182,7 +250,17 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
               onClick={openPicker}
             >
               <MapPin size={14} className="text-primary-500" />
-              {hasPoint ? 'Change Location' : 'Choose Your Location'}
+              {hasPoint ? 'Adjust on Map' : 'Choose on Map'}
+            </button>
+            <button
+              type="button"
+              disabled={geocoding}
+              className="inline-flex items-center gap-1.5 text-xs border border-stone-300 rounded-lg px-3 py-2 text-gray-700 hover:bg-stone-50 disabled:opacity-50"
+              onClick={() => detectFromAddress(false)}
+              title="Detect coordinates from the entered address"
+            >
+              <Sparkles size={14} className={geocoding ? 'animate-spin text-primary-500' : 'text-primary-600'} />
+              {geocoding ? 'Detecting…' : 'Locate from Address'}
             </button>
             <button
               type="button"
@@ -202,14 +280,24 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
 
       {!open && hasPoint && (
         <div className="flex items-center justify-between bg-stone-50 rounded-lg px-3 py-2 text-xs">
-          <span className="text-emerald-700 font-medium inline-flex items-center gap-1.5">
-            <Check size={14} className="text-emerald-600" />
-            Location selected: {Number(lat).toFixed(6)}, {Number(lng).toFixed(6)}
-          </span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span className="text-emerald-700 font-medium inline-flex items-center gap-1.5">
+              <Check size={14} className="text-emerald-600" />
+              Location set: {Number(lat).toFixed(6)}, {Number(lng).toFixed(6)}
+            </span>
+            {detectedAddressName && (
+              <span className="text-gray-500 text-[11px] truncate max-w-xs">
+                ({detectedAddressName})
+              </span>
+            )}
+          </div>
           <button
             type="button"
-            className="text-gray-400 hover:text-red-500 transition-colors"
-            onClick={() => onChange({ lat: null, lng: null })}
+            className="text-gray-400 hover:text-red-500 transition-colors shrink-0"
+            onClick={() => {
+              lastGeocodedRef.current = ''
+              onChange({ lat: null, lng: null })
+            }}
           >
             Remove location
           </button>
@@ -227,17 +315,29 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
         <div id={panelId} className="space-y-3 pt-2 border-t border-stone-100">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-gray-600">
-              Tap anywhere on the map or drag the pin to your property's exact location.
+              Tap anywhere on the map or drag the pin to fine-tune the exact location.
             </p>
-            <button
-              type="button"
-              onClick={() => locate(false)}
-              disabled={locating}
-              className="inline-flex items-center gap-1.5 text-xs border border-stone-300 rounded-lg px-3 py-1.5 hover:bg-stone-50 disabled:opacity-50"
-            >
-              <LocateFixed size={13} className={locating ? 'animate-spin text-primary-500' : 'text-gray-500'} />
-              {locating ? 'Locating…' : 'Use Current Location'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => detectFromAddress(false)}
+                disabled={geocoding || !address}
+                className="inline-flex items-center gap-1.5 text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 hover:bg-stone-50 disabled:opacity-50"
+                title="Detect from the address above"
+              >
+                <Sparkles size={13} className={geocoding ? 'animate-spin text-primary-500' : 'text-primary-600'} />
+                {geocoding ? 'Detecting…' : 'Locate from Address'}
+              </button>
+              <button
+                type="button"
+                onClick={() => locate(false)}
+                disabled={locating}
+                className="inline-flex items-center gap-1.5 text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 hover:bg-stone-50 disabled:opacity-50"
+              >
+                <LocateFixed size={13} className={locating ? 'animate-spin text-primary-500' : 'text-gray-500'} />
+                {locating ? 'Locating…' : 'Use Current Location'}
+              </button>
+            </div>
           </div>
 
           {/* Interactive Leaflet Map */}
@@ -289,10 +389,10 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
               {point ? (
                 <span className="text-emerald-700 font-medium inline-flex items-center gap-1">
                   <Check size={14} className="text-emerald-600" />
-                  Pin placed at: {point.lat.toFixed(6)}, {point.lng.toFixed(6)} (drag to fine-tune)
+                  Pin placed: {point.lat.toFixed(6)}, {point.lng.toFixed(6)} (drag to fine-tune)
                 </span>
               ) : (
-                'No pin placed yet. Tap anywhere on the map or click Use Current Location.'
+                'No pin placed yet. Tap anywhere on the map or click Locate from Address.'
               )}
             </p>
 
