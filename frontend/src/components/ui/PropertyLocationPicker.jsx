@@ -1,106 +1,116 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { LocateFixed, MapPin } from 'lucide-react'
-import { loadGoogleMaps, validPoint } from '../../utils/googleMaps'
+import { LocateFixed, MapPin, Check, AlertCircle } from 'lucide-react'
+import L from 'leaflet'
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 
-function GooglePinMap({ initialPoint, point, mapRef, markerRef, onSelect, onError }) {
-  const container = useRef(null)
-  const latestPoint = useRef(point)
+// Custom branded SVG pin for Bharat Properties
+const customPinIcon = L.divIcon({
+  className: 'custom-property-pin',
+  html: `
+    <div style="position:relative; width:36px; height:44px; transform:translate(-18px, -44px); cursor:grab;">
+      <svg width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <filter id="shadow" x="-4" y="0" width="44" height="48" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
+        </filter>
+        <path g="M18 2C9.71573 2 3 8.71573 3 17C3 27.25 18 42 18 42C18 42 33 27.25 33 17C33 8.71573 26.2843 2 18 2Z" fill="#E8532A" stroke="#FFFFFF" stroke-width="2" filter="url(#shadow)"/>
+        <circle cx="18" cy="17" r="6" fill="#FFFFFF"/>
+        <circle cx="18" cy="17" r="3" fill="#E8532A"/>
+      </svg>
+    </div>
+  `,
+  iconSize: [0, 0],
+  iconAnchor: [0, 0],
+})
 
+// Ensures map renders without grey tiles or sizing defects when opened
+function MapResize() {
+  const map = useMap()
   useEffect(() => {
-    latestPoint.current = point
-    if (markerRef.current && point) markerRef.current.position = point
-  }, [point, markerRef])
-
-  useEffect(() => {
-    let cancelled = false
-    const listeners = []
-    const previousAuthFailure = window.gm_authFailure
-    const authFailure = () => { if (!cancelled) onError(); previousAuthFailure?.() }
-    window.gm_authFailure = authFailure
-
-    loadGoogleMaps().then(async (maps) => {
-      const [{ Map }, { AdvancedMarkerElement }] = await Promise.all([
-        maps.importLibrary('maps'),
-        maps.importLibrary('marker')
-      ])
-      if (cancelled) return
-
-      const map = new Map(container.current, {
-        center: latestPoint.current || initialPoint || { lat: 22.5, lng: 79 },
-        zoom: latestPoint.current || initialPoint ? 16 : 5,
-        mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID',
-        streetViewControl: false,
-        fullscreenControl: false,
-        mapTypeControl: true,
-        gestureHandling: 'cooperative',
-      })
-
-      const marker = new AdvancedMarkerElement({
-        map,
-        position: latestPoint.current || initialPoint || undefined,
-        gmpDraggable: true,
-        title: 'Property location - drag to move'
-      })
-
-      mapRef.current = map
-      markerRef.current = marker
-
-      const select = (latLng) => {
-        if (!latLng) return
-        const p = { lat: Number(latLng.lat().toFixed(6)), lng: Number(latLng.lng().toFixed(6)) }
-        marker.position = p
-        onSelect(p)
-      }
-
-      listeners.push(map.addListener('click', (event) => {
-        event.stop?.()
-        select(event.latLng)
-      }))
-      listeners.push(marker.addListener('dragend', (event) => select(event.latLng)))
-    }).catch(() => { if (!cancelled) onError() })
-
+    map.invalidateSize()
+    const t1 = setTimeout(() => map.invalidateSize(), 100)
+    const t2 = setTimeout(() => map.invalidateSize(), 350)
     return () => {
-      cancelled = true
-      listeners.forEach((listener) => listener.remove())
-      if (markerRef.current) markerRef.current.map = null
-      mapRef.current = null
-      markerRef.current = null
-      if (window.gm_authFailure === authFailure) window.gm_authFailure = previousAuthFailure
+      clearTimeout(t1)
+      clearTimeout(t2)
     }
-  }, [])
-
-  return (
-    <div
-      ref={container}
-      className="h-[360px] w-full rounded-xl border border-stone-200"
-      aria-label="Google Maps property pin picker"
-    />
-  )
+  }, [map])
+  return null
 }
+
+// Handles user taps/clicks on the map to drop a pin
+function MapClickHandler({ onSelect }) {
+  useMapEvents({
+    click(e) {
+      if (!e.latlng) return
+      onSelect({
+        lat: Number(e.latlng.lat.toFixed(6)),
+        lng: Number(e.latlng.lng.toFixed(6)),
+      })
+    },
+  })
+  return null
+}
+
+// Smoothly re-centers and zooms the map when a new position is chosen
+function MapCenterController({ center, zoom = 15 }) {
+  const map = useMap()
+  useEffect(() => {
+    if (center && Number.isFinite(center.lat) && Number.isFinite(center.lng)) {
+      map.flyTo([center.lat, center.lng], zoom, { duration: 0.8 })
+    }
+  }, [center, zoom, map])
+  return null
+}
+
+const isValidCoord = (lat, lng) =>
+  Number.isFinite(Number(lat)) &&
+  Math.abs(Number(lat)) <= 90 &&
+  Number.isFinite(Number(lng)) &&
+  Math.abs(Number(lng)) <= 180
 
 export default function PropertyLocationPicker({ lat, lng, onChange, address = '' }) {
   const panelId = useId()
-  const hasPoint = validPoint(lat, lng)
+  const hasPoint = isValidCoord(lat, lng)
+
   const [open, setOpen] = useState(false)
   const [point, setPoint] = useState(null)
-  const [initialPoint, setInitialPoint] = useState(null)
-  const [mapUnavailable, setMapUnavailable] = useState(false)
+  const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 }) // Default India center
+  const [mapZoom, setMapZoom] = useState(5)
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState('')
-  const mapRef = useRef(null)
-  const markerRef = useRef(null)
-  const requestId = useRef(0)
 
+  const requestId = useRef(0)
   useEffect(() => () => { requestId.current += 1 }, [])
+
+  // Geocode address when opening if no pin is set yet to bring map near locality/city
+  useEffect(() => {
+    if (open && !point && address && address.trim().length > 3) {
+      const controller = new AbortController()
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
+        signal: controller.signal,
+        headers: { 'Accept-Language': 'en' },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data && data[0]) {
+            const geocoded = {
+              lat: Number(parseFloat(data[0].lat).toFixed(6)),
+              lng: Number(parseFloat(data[0].lon).toFixed(6)),
+            }
+            setMapCenter(geocoded)
+            setMapZoom(14)
+          }
+        })
+        .catch(() => {})
+      return () => controller.abort()
+    }
+  }, [open, address, point])
 
   const select = (value) => {
     setPoint(value)
+    setMapCenter(value)
+    setMapZoom(16)
     setError('')
-    if (markerRef.current) markerRef.current.position = value
-    if (mapRef.current) {
-      mapRef.current.panTo(value)
-      mapRef.current.setZoom(17)
-    }
   }
 
   const close = () => {
@@ -124,7 +134,7 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
         if (request !== requestId.current) return
         const newPoint = {
           lat: Number(coords.latitude.toFixed(6)),
-          lng: Number(coords.longitude.toFixed(6))
+          lng: Number(coords.longitude.toFixed(6)),
         }
         select(newPoint)
         setLocating(false)
@@ -135,17 +145,19 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
       () => {
         if (request !== requestId.current) return
         setLocating(false)
-        setError('Could not access your location. Please allow location permissions in your browser or select on the map.')
+        setError('Could not access your location. Please enable location permissions or tap on the map.')
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     )
   }
 
   const openPicker = () => {
-    const saved = hasPoint ? { lat, lng } : null
+    const saved = hasPoint ? { lat: Number(lat), lng: Number(lng) } : null
     setPoint(saved)
-    setInitialPoint(saved)
-    setMapUnavailable(false)
+    if (saved) {
+      setMapCenter(saved)
+      setMapZoom(16)
+    }
     setError('')
     setOpen(true)
   }
@@ -191,8 +203,8 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
       {!open && hasPoint && (
         <div className="flex items-center justify-between bg-stone-50 rounded-lg px-3 py-2 text-xs">
           <span className="text-emerald-700 font-medium inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            Location set ({lat.toFixed(4)}, {lng.toFixed(4)})
+            <Check size={14} className="text-emerald-600" />
+            Location selected: {Number(lat).toFixed(6)}, {Number(lng).toFixed(6)}
           </span>
           <button
             type="button"
@@ -205,7 +217,8 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
       )}
 
       {error && !open && (
-        <p role="alert" className="text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+        <p role="alert" className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 flex items-center gap-1.5">
+          <AlertCircle size={14} className="shrink-0" />
           {error}
         </p>
       )}
@@ -214,7 +227,7 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
         <div id={panelId} className="space-y-3 pt-2 border-t border-stone-100">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-gray-600">
-              Tap anywhere on the map or drag the pin to set the property's location.
+              Tap anywhere on the map or drag the pin to your property's exact location.
             </p>
             <button
               type="button"
@@ -227,47 +240,59 @@ export default function PropertyLocationPicker({ lat, lng, onChange, address = '
             </button>
           </div>
 
-          {!mapUnavailable && (
-            <GooglePinMap
-              initialPoint={initialPoint}
-              point={point}
-              mapRef={mapRef}
-              markerRef={markerRef}
-              onSelect={(selected) => {
-                requestId.current += 1
-                setLocating(false)
-                setError('')
-                setPoint(selected)
-              }}
-              onError={() => setMapUnavailable(true)}
-            />
-          )}
-
-          {mapUnavailable && (
-            <div className="space-y-2">
-              <p role="status" className="text-xs text-amber-700">
-                Interactive map preview:
-              </p>
-              <iframe
-                title="Google Maps location preview"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(address || 'India')}&z=15&output=embed`}
-                className="w-full h-64 border-0 rounded-xl"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+          {/* Interactive Leaflet Map */}
+          <div className="h-[340px] w-full rounded-xl overflow-hidden border border-stone-200 relative shadow-inner">
+            <MapContainer
+              center={[mapCenter.lat, mapCenter.lng]}
+              zoom={mapZoom}
+              scrollWheelZoom={true}
+              style={{ height: '100%', width: '100%', zIndex: 0 }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
               />
-            </div>
-          )}
+              <MapResize />
+              <MapClickHandler onSelect={select} />
+              <MapCenterController center={mapCenter} zoom={mapZoom} />
 
-          {error && <p role="alert" className="text-xs text-amber-700">{error}</p>}
+              {point && (
+                <Marker
+                  position={[point.lat, point.lng]}
+                  icon={customPinIcon}
+                  draggable={true}
+                  eventHandlers={{
+                    dragend(e) {
+                      const marker = e.target
+                      const pos = marker.getLatLng()
+                      select({
+                        lat: Number(pos.lat.toFixed(6)),
+                        lng: Number(pos.lng.toFixed(6)),
+                      })
+                    },
+                  }}
+                />
+              )}
+            </MapContainer>
+          </div>
+
+          {error && (
+            <p role="alert" className="text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center gap-1.5">
+              <AlertCircle size={14} className="shrink-0" />
+              {error}
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <p role="status" className="text-xs text-gray-600">
               {point ? (
-                <span className="text-emerald-700 font-medium">
-                  Selected: {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
+                <span className="text-emerald-700 font-medium inline-flex items-center gap-1">
+                  <Check size={14} className="text-emerald-600" />
+                  Pin placed at: {point.lat.toFixed(6)}, {point.lng.toFixed(6)} (drag to fine-tune)
                 </span>
               ) : (
-                'No location selected yet. Tap the map or click Use Current Location.'
+                'No pin placed yet. Tap anywhere on the map or click Use Current Location.'
               )}
             </p>
 
