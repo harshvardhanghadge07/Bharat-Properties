@@ -45,7 +45,8 @@ app.use(cors({
     // Allow requests with no origin (server-to-server, curl, mobile apps, health checks)
     if (!origin) return callback(null, true)
 
-    if (allowedOrigins.includes(origin)) {
+    // Allow explicitly configured origins or any Vercel deployment/preview (*.vercel.app)
+    if (allowedOrigins.includes(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin)) {
       return callback(null, true)
     }
 
